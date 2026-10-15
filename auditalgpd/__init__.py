@@ -20,6 +20,9 @@ def create_app(test_config=None):
         app.config.update(test_config)
     Path(app.instance_path).mkdir(parents=True, exist_ok=True)
 
+    from .web import init_app
+    init_app(app)
+
     @app.get("/health")
     def health():
         return {"status": "ok", "application": "AuditaLGPD", "version": "0.1.0"}

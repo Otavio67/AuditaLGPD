@@ -5,6 +5,10 @@ from auditalgpd.domain import Status
 
 
 class DetectorTests(unittest.TestCase):
+    def test_invalid_or_script_policy_links_are_ignored(self):
+        soup = parse_html('<a href="javascript:alert(1)">Privacidade</a><a href="http://[">Privacidade</a>')
+        self.assertEqual(find_policy(soup, "https://example.com/"), [])
+
     def checks(self, html):
         return {item.key: item for item in analyze_page(html, "https://example.org/", True)}
 

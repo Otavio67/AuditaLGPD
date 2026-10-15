@@ -1,7 +1,7 @@
 """Heurísticas de HTML estático; presença não equivale à adequação legal."""
 
 import re
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlsplit
 from bs4 import BeautifulSoup
 from .domain import Check, Status, public_url
 
@@ -64,7 +64,13 @@ def find_policy(soup, base_url):
     candidates = []
     for link in soup.find_all("a", href=True):
         if visible(link) and re.search(r"privacidade|privacy\s*policy|proteção de dados|protecao de dados", link.get_text(" ", strip=True), re.I):
-            value = urljoin(base_url, link["href"])
+            try:
+                value = urljoin(base_url, link["href"])
+                parsed = urlsplit(value)
+                if parsed.scheme not in {"http", "https"} or not parsed.hostname or parsed.username is not None:
+                    continue
+            except ValueError:
+                continue
             if value not in candidates:
                 candidates.append(value)
     return candidates[:3]

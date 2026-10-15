@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="hero"><p class="eyebrow"><span class="dot"></span> PRIVACIDADE COMEÇA COM VISIBILIDADE</p>
+  <h1>Um primeiro olhar sobre<br>a privacidade do seu site.</h1>
+  <p class="lead">Identifique sinais técnicos relacionados à privacidade e organize evidências para a sua avaliação.</p>
+</section>
+<div class="home-grid">
+  <section class="panel audit-form"><div class="panel-heading"><span class="step">01</span><div><h2>Iniciar diagnóstico</h2><p>Informe a página pública que deseja analisar.</p></div></div>
+    {% if error %}<div class="alert error" role="alert">{{ error }}</div>{% endif %}
+    <form action="{{ url_for('web.create') }}" method="post" id="audit-form">
+      <input type="hidden" name="csrf" value="{{ csrf_token }}">
+      <label for="url">Endereço do site</label>
+      <input id="url" name="url" type="text" inputmode="url" autocomplete="url" placeholder="https://seusite.com.br" value="{{ entered_url }}" required maxlength="2048" aria-describedby="url-help">
+      <p id="url-help" class="hint">Somente páginas públicas HTTP ou HTTPS, em portas padrão.</p>
+      <label class="checkbox"><input type="checkbox" name="authorized" value="yes" required><span>Sou responsável pelo site ou tenho autorização para realizar esta análise.</span></label>
+      <button type="submit" class="button primary" id="submit-audit">Analisar site <span aria-hidden="true">↗</span></button>
+      <p class="hint progress" id="progress" role="status" aria-live="polite">A análise consulta a página e uma política vinculada, quando disponível.</p>
+      <p class="hint"><a href="{{ url_for('web.demo') }}">Explorar um resultado de demonstração →</a></p>
+    </form>
+  </section>
+  <aside class="scope"><p class="eyebrow">O QUE ESTA VERSÃO OBSERVA</p>
+    <ul class="scope-list"><li><span class="scope-symbol">↗</span><div><h3>Conexão HTTPS</h3><p>Uso de conexão segura e validação do certificado.</p></div></li><li><span class="scope-symbol">◫</span><div><h3>Cookies e formulários</h3><p>Indícios de banner e campos de dados pessoais no HTML.</p></div></li><li><span class="scope-symbol">≡</span><div><h3>Política de privacidade</h3><p>Localização do link e tentativa de acesso ao texto.</p></div></li></ul>
+    <p class="scope-note">A ferramenta não certifica conformidade com a LGPD. JavaScript e análise por IA ainda não estão integrados.</p>
+  </aside>
+</div>
+<section class="workflow" aria-label="Como funciona"><div><span>01 / INFORME</span><p>Uma URL pública autorizada</p></div><div><span>02 / OBSERVE</span><p>Verificações com evidências</p></div><div><span>03 / DOCUMENTE</span><p>Histórico local e relatório PDF</p></div></section>
+{% endblock %}

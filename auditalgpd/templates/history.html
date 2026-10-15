@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block title %}Histórico{% endblock %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow">SEU REGISTRO DE ANÁLISES</p><h1>Histórico local</h1><p class="lead small">Até 30 diagnósticos recentes, armazenados neste computador.</p></div><a class="button primary" href="{{ url_for('web.home') }}">Nova análise ↗</a></div>
+{% if audits %}<div class="panel history-list">{% for audit in audits %}<a class="history-item" href="{{ url_for('web.result', audit_id=audit.id) }}"><div><strong>{{ audit.url }}</strong><span>{{ audit.created_at | data_br }} · {{ audit.checks|length }} verificações</span></div><span aria-hidden="true">↗</span></a>{% endfor %}</div>{% else %}<div class="panel empty"><span class="empty-icon" aria-hidden="true">≡</span><h2>Seu histórico começa aqui</h2><p>Após a primeira análise, você poderá consultar o resultado e baixar o relatório.</p><a class="button secondary" href="{{ url_for('web.home') }}">Analisar um site</a></div>{% endif %}
+<p class="hint">O histórico contém URLs sem parâmetros e observações técnicas. O HTML completo e os valores de formulários não são armazenados.</p>
+{% endblock %}
