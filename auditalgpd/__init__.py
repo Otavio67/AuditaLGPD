@@ -15,6 +15,7 @@ def create_app(test_config=None):
         MAX_CONTENT_LENGTH=16 * 1024,
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE="Strict",
+        TRUSTED_HOSTS=["localhost", "127.0.0.1"],
     )
     if test_config:
         app.config.update(test_config)

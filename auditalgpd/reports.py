@@ -14,6 +14,7 @@ LABELS = {"presente": "Identificado", "nao_identificado": "Não identificado", "
 def generate_pdf(audit):
     stream = BytesIO()
     styles = getSampleStyleSheet()
+    styles["Heading2"].keepWithNext = True
     styles.add(ParagraphStyle(name="BodyPT", fontName="Helvetica", fontSize=10, leading=15, spaceAfter=9, textColor=colors.HexColor("#29443b"), splitLongWords=True))
     doc = SimpleDocTemplate(stream, pagesize=A4, rightMargin=22*mm, leftMargin=22*mm, topMargin=22*mm, bottomMargin=22*mm,
                             title="AuditaLGPD - Diagnóstico técnico preliminar", author="AuditaLGPD")

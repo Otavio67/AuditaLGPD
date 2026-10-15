@@ -71,6 +71,9 @@ class AppTests(unittest.TestCase):
             self.assertEqual(self.client.get(path).status_code, 404)
         self.assertEqual(self.client.post("/auditorias", data={"url": "x" * 17000}).status_code, 413)
 
+    def test_untrusted_host_is_rejected(self):
+        self.assertEqual(self.client.get("/", headers={"Host": "unexpected.example"}).status_code, 400)
+
     def test_failed_collection_remains_error_and_not_run(self):
         class BrokenFetcher:
             def fetch(self, *args, **kwargs):
