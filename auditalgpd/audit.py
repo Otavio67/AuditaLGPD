@@ -34,7 +34,7 @@ class Auditoria:
         try:
             collector = self.browser_fetcher if mode == "browser" else self.fetcher
             if collector is None:
-                raise AuditError("O coletor Selenium não está disponível nesta instalação.")
+                raise AuditError("A análise avançada não está disponível nesta instalação.")
             page = collector.fetch(target.url, deadline=deadline)
             result.final_url = public_url(page.url)
             result.browser = page.browser
@@ -45,7 +45,7 @@ class Auditoria:
             if mode == "static":
                 result.limitations.append("O modo rápido não executa JavaScript. Conteúdos dinâmicos podem não ser identificados.")
             else:
-                result.checks.append(Check("selenium", "Página dinâmica com Selenium", Status.PRESENT,
+                result.checks.append(Check("selenium", "Página com conteúdo dinâmico", Status.PRESENT,
                                            "Coleta concluída em navegador local com perfil temporário, antes de qualquer escolha de cookies."))
                 cookies = result.browser.get("cookies", [])
                 result.checks.append(Check("cookies", "Cookies observados no navegador", Status.PRESENT if cookies else Status.ABSENT,

@@ -143,7 +143,7 @@ def main():
     except AuditError as exc:
         result = {"error": str(exc)}
     except ImportError:
-        result = {"error": "Selenium não está instalado. Execute a instalação de dependências descrita no README."}
+        result = {"error": "A análise avançada precisa dos componentes locais. Conclua a instalação descrita no guia do projeto."}
     except Exception:
         result = {"error": "O coletor dinâmico falhou. Nenhuma conclusão foi inferida para a página."}
     Path(config["output"]).write_text(json.dumps(result, ensure_ascii=False), encoding="utf-8")

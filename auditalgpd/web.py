@@ -14,6 +14,7 @@ from .assessment import assessment
 from .browser import SeleniumFetcher
 from .settings import Settings
 from .jobs import Jobs, BusyError
+from .presentation import display_check
 
 bp = Blueprint("web", __name__)
 LABELS = {"presente": "Identificado", "nao_identificado": "Não identificado", "erro": "Erro na verificação", "nao_executado": "Não executado"}
@@ -28,7 +29,7 @@ def helpers():
     if "csrf" not in session:
         session["csrf"] = secrets.token_urlsafe(32)
     return {"csrf_token": session["csrf"], "status_labels": LABELS,
-            "local_settings": current_app.extensions["settings"].public()}
+            "local_settings": current_app.extensions["settings"].public(), "display_check": display_check}
 
 
 def require_csrf():

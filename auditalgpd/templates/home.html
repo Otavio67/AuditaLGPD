@@ -16,8 +16,8 @@
       <input id="url" name="url" type="text" inputmode="url" autocomplete="url" placeholder="https://seusite.com.br" value="{{ entered_url }}" required maxlength="2048" aria-describedby="url-help">
       <p id="url-help" class="hint">Uma página pública HTTP ou HTTPS, sem login.</p>
       <label for="mode">Como deseja analisar?</label>
-      <select id="mode" name="mode"><option value="browser">Completa · navegador local com Selenium</option><option value="static">Rápida · somente HTML, sem JavaScript</option></select>
-      <p class="hint">Na primeira coleta com Selenium, pode ser necessário baixar o driver do {{ local_settings.browser | capitalize }}.</p>
+      <select id="mode" name="mode" aria-describedby="mode-help"><option value="static" {% if request.form.get('mode') == 'static' %}selected{% endif %}>Análise simples</option><option value="browser" {% if request.form.get('mode', 'browser') == 'browser' %}selected{% endif %}>Análise avançada</option></select>
+      <p class="hint" id="mode-help">A simples faz uma verificação rápida. A avançada também observa o conteúdo carregado ao abrir a página, os cookies e uma captura da tela.</p>
       <label class="checkbox ai-option"><input type="checkbox" name="use_ai" value="yes" {% if not local_settings.configured %}disabled{% endif %}><span><strong>Incluir interpretação com Gemini</strong><br>Envia ao Google até 24 mil caracteres do texto da política, com remoção básica de alguns identificadores. {% if not local_settings.configured %}<a href="{{ url_for('web.settings') }}">Configure sua chave para ativar.</a>{% else %}Modelo: {{ local_settings.model }}. Uso sujeito à cota e às condições da sua conta.{% endif %}</span></label>
       <label class="checkbox"><input type="checkbox" name="authorized" value="yes" required><span>Sou responsável pelo site ou tenho autorização para realizar esta análise.</span></label>
       <button type="submit" class="button primary" id="submit-audit">Analisar privacidade <span aria-hidden="true">→</span></button>

@@ -49,7 +49,7 @@ class SeleniumFetcher:
                 process.wait(timeout=5)
                 raise AuditError("O navegador excedeu o prazo da análise e foi encerrado.")
             if not output.exists() or output.stat().st_size > 4_000_000:
-                raise AuditError("O navegador não concluiu a coleta. Confira a instalação do Selenium e do navegador nas configurações.")
+                raise AuditError("A análise avançada não foi concluída. Confira o navegador selecionado nas configurações.")
             try:
                 data = json.loads(output.read_text(encoding="utf-8"))
             except (ValueError, OSError) as exc:
