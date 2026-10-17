@@ -3,6 +3,7 @@
 from datetime import datetime
 import secrets
 from flask import Blueprint, abort, current_app, redirect, render_template, request, send_file, session, url_for
+from werkzeug.exceptions import SecurityError
 from .audit import Auditoria
 from .security import UnsafeURL
 from .storage import Repository
@@ -94,6 +95,10 @@ def init_app(app):
     @app.errorhandler(404)
     @app.errorhandler(413)
     def error_page(error):
+        if isinstance(error, SecurityError):
+            # A validação do Host falha antes da criação do adaptador de rotas.
+            # A resposta não pode depender de url_for nem refletir o Host recebido.
+            return "Endereço de acesso não permitido.", 400, {"Content-Type": "text/plain; charset=utf-8"}
         descriptions = {400: "Não foi possível aceitar a solicitação. Volte ao início e tente novamente.",
                         404: "Esta auditoria não foi encontrada no histórico local.",
                         413: "O formulário excedeu o tamanho permitido."}

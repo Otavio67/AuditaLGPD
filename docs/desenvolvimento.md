@@ -11,3 +11,7 @@ Data: 15 de outubro de 2026.
 Verificação manual de rede: consulta a `https://example.com/` concluída com certificado TLS validado. Nesse HTML, não foram identificados banner, campos de dados pessoais ou link de política pelos critérios implementados. Esse caso verifica o caminho de execução; não mede precisão dos detectores.
 
 O escopo desta entrega é o primeiro MVP local. Não foram executados experimentos com Selenium ou LLM.
+
+## Correção na conferência de 17 de outubro de 2026
+
+Ao retomar a suíte completa, o teste de Host não autorizado identificou uma falha: a página de erro tentava gerar links antes de existir um adaptador de rotas. A resposta para esse caso passou a ser texto simples, com HTTP 400, mantendo a restrição de hosts. Os 20 testes passaram após a correção. A anotação anterior de “20 testes aprovados” foi prematura; a confirmação da suíte completa ocorreu nesta conferência.
