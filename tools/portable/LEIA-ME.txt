@@ -1,0 +1,48 @@
+AuditaLGPD - versão portátil para Windows 10/11 de 64 bits
+
+1. Clique com o botão direito no ZIP e escolha "Extrair tudo".
+2. Entre na pasta extraída e dê dois cliques em INICIAR.cmd.
+3. A interface abre automaticamente no seu navegador padrão.
+
+Mantenha a janela do aplicativo aberta durante o uso. Para encerrar, pressione
+Ctrl+C nessa janela. Abrir INICIAR.cmd novamente leva à execução já aberta.
+Não execute de dentro do ZIP. Guarde a pasta em um local em que possa gravar.
+
+O QUE JÁ ESTÁ INCLUÍDO
+Python, bibliotecas, navegador para análise avançada, driver, interface,
+histórico local e geração de PDF. Não é preciso instalar Python, Git ou drivers.
+É necessário um navegador padrão do Windows para visualizar a interface.
+Os componentes são versões fixas: atualizações exigem um novo pacote.
+
+INTERNET E GEMINI
+A demonstração, o histórico e a geração de PDF funcionam sem internet.
+Analisar sites externos exige conexão. Para usar a IA opcional, informe sua
+própria chave do Gemini em Configurações e marque a opção de IA na análise.
+A chave digitada não é salva em arquivo; precisa ser informada novamente
+quando o aplicativo for encerrado. O Gemini é um serviço externo do Google,
+sujeito às condições, cotas e eventual cobrança da sua conta.
+Sem chave, as análises simples e avançadas continuam funcionando.
+
+SEUS DADOS
+O histórico e as preferências são criados na subpasta "dados". Para migrar
+seu histórico, encerre o aplicativo antes de copiar a pasta inteira.
+Antes de compartilhar SUA cópia usada, retire a pasta "dados": ela pode
+conter relatórios, capturas e informações de sites que você analisou.
+O ZIP original é distribuído sem histórico, chaves ou perfis pessoais.
+Não compartilhe a pasta enquanto a ferramenta estiver em execução.
+
+SOBRE AS ANÁLISES
+A nota descreve sinais técnicos observáveis, sem certificar conformidade
+jurídica com a LGPD. O navegador incluído executa JavaScript, mas pode ter
+diferenças de comportamento em relação ao navegador de um visitante.
+Proteções de sites, carregamentos tardios e recursos bloqueados podem
+limitar os resultados. Confira as evidências e os itens pendentes.
+
+SE NÃO ABRIR
+Confira se o Windows é de 64 bits, se o ZIP foi totalmente extraído e se
+a pasta permite gravação. Se a abertura automática falhar, copie o endereço
+http://127.0.0.1:... mostrado na janela e abra no navegador.
+O aplicativo não requer acesso de administrador e escuta somente neste PC.
+
+Código e atualizações: https://github.com/Otavio67/AuditaLGPD
+Licenças dos componentes: LICENCAS.txt

@@ -1,5 +1,13 @@
 # Alterações
 
+## Pacote portátil — 17/10/2026
+
+- Distribuição Windows x64 com Python, dependências e navegador/driver incluídos.
+- Launcher com abertura automática, porta livre, dados na própria pasta e prevenção de instâncias duplicadas.
+- Preferência automática pelo navegador incluído, sem download de driver na primeira coleta.
+- Gerador com fontes permitidas, hashes e licenças; nenhum histórico, segredo ou perfil pessoal distribuído.
+- Testes do navegador incluído e de relocação; suíte offline ampliada para 40 casos e CI com Python 3.13.
+
 ## Refinamentos visuais — 17/10/2026
 
 - Modalidades apresentadas como Análise simples e Análise avançada; nome do componente técnico removido da interface e das mensagens de resultado.

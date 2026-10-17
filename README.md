@@ -21,7 +21,17 @@ Os estados **Identificado** (verde), **Não identificado** (vermelho), **Erro** 
 
 Leia [metodologia e referências](docs/metodologia.md) para os pesos, limiares, bases consultadas e limitações. [Cookiebot](https://www.cookiebot.com/en/cookie-checker/) e [CookieYes](https://www.cookieyes.com/cookie-scanner/) foram pesquisados como referências de inventário e relatório; [GTmetrix](https://gtmetrix.com/) foi referência de organização visual. Não houve validação comparativa de precisão nem cópia de marcas/ativos.
 
-## Executar no Windows
+## Versão portátil para Windows
+
+O pacote **AuditaLGPD-Portable-Windows-x64.zip** inclui Python 3.13.16, bibliotecas, Chromium Headless Shell 155.0.8059.84 e ChromeDriver da mesma versão. Para Windows 10/11 de 64 bits: use **Extrair tudo** e dê dois cliques em **INICIAR.cmd**. A interface abre no navegador padrão do computador; não exige instalar Python, Git ou drivers. Mantenha a janela aberta durante o uso e encerre com `Ctrl+C`.
+
+O launcher escolhe uma porta livre em `127.0.0.1`. Abrir novamente a mesma pasta leva à execução existente. Histórico e preferências ficam na subpasta `dados`; encerre antes de copiar a pasta para preservar o histórico. O ZIP original é gerado sem histórico, `.env`, chaves ou perfis pessoais. Antes de compartilhar uma cópia já usada, retire a pasta `dados`.
+
+Internet é necessária para analisar páginas externas e usar o Gemini. A demonstração, o histórico salvo e o PDF funcionam offline. A IA exige uma chave própria nas configurações; sem chave, as duas modalidades de análise continuam disponíveis. O navegador incluído executa JavaScript com perfil descartável, mas pode se comportar de forma diferente do navegador completo de um visitante. Os componentes são fixos e devem ser atualizados com um novo pacote.
+
+O ZIP portátil é um artefato separado do código-fonte baixado pelo botão **Code → Download ZIP** do GitHub. Consulte [o guia de geração e validação](docs/portatil.md) para montar o pacote completo. Não envie a pasta `.venv` para outro PC.
+
+## Executar pelo código-fonte no Windows
 
 Pré-requisitos: Python 3.11+, Git e Edge ou Chrome instalado para a coleta dinâmica.
 
