@@ -7,8 +7,8 @@ from pathlib import Path
 from flask import Flask
 
 
-def create_app(test_config=None):
-    app = Flask(__name__, instance_relative_config=True)
+def create_app(test_config=None, *, instance_path=None):
+    app = Flask(__name__, instance_relative_config=True, instance_path=instance_path)
     app.config.from_mapping(
         SECRET_KEY=os.environ.get("AUDITALGPD_SECRET_KEY") or secrets.token_hex(32),
         DATABASE=str(Path(app.instance_path) / "auditorias.sqlite3"),

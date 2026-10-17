@@ -2,6 +2,7 @@
 
 import base64
 import json
+import os
 from pathlib import Path
 import sys
 import time
@@ -66,6 +67,29 @@ def page_cookies(cookies, domains):
                                       for host in domains)]
 
 
+def start_driver(webdriver, options, browser):
+    """O portátil usa binários fixos, sem procurar/baixar drivers no PC."""
+    binary = os.environ.get("AUDITALGPD_BROWSER_BINARY")
+    driver_path = os.environ.get("AUDITALGPD_BROWSER_DRIVER")
+    if binary or driver_path:
+        if browser != "chrome" or not binary or not driver_path or not Path(binary).is_file() or not Path(driver_path).is_file():
+            raise AuditError("O navegador incluído está incompleto. Extraia novamente toda a pasta do aplicativo.")
+        from selenium.webdriver.chrome.service import Service
+        options.binary_location = binary
+        environment = dict(os.environ)
+        for argument in list(options.arguments):
+            if argument.startswith("--user-data-dir="):
+                # O Shell não abre a página inicial com perfil explícito.
+                # ChromeDriver cria seu próprio perfil dentro do mesmo temporário,
+                # que o processo pai remove inclusive após timeout/encerramento.
+                temporary = str(Path(argument.split("=", 1)[1]).parent)
+                environment.update(TEMP=temporary, TMP=temporary, TMPDIR=temporary)
+                options.arguments.remove(argument)
+        return webdriver.Chrome(service=Service(executable_path=driver_path, env=environment,
+                                                driver_path_env_key="AUDITALGPD_BROWSER_DRIVER"), options=options)
+    return webdriver.Edge(options=options) if browser == "edge" else webdriver.Chrome(options=options)
+
+
 def collect(config):
     from selenium import webdriver
     from selenium.webdriver.support.ui import WebDriverWait
@@ -90,7 +114,7 @@ def collect(config):
         options.add_argument(f"--proxy-server=http://127.0.0.1:{proxy.server_port}")
         driver = None
         try:
-            driver = webdriver.Edge(options=options) if browser == "edge" else webdriver.Chrome(options=options)
+            driver = start_driver(webdriver, options, browser)
             driver.set_page_load_timeout(min(25, timeout))
             driver.set_script_timeout(5)
             driver.execute_cdp_cmd("Browser.setDownloadBehavior", {"behavior": "deny"})
@@ -130,6 +154,8 @@ def collect(config):
                                 "blocked": proxy.blocked, "observation_seconds": 3,
                                 "screenshot": base64.b64encode(screenshot).decode("ascii") if len(screenshot) <= 1_000_000 else ""}}
         except WebDriverException as exc:
+            if os.environ.get("AUDITALGPD_BROWSER_BINARY"):
+                raise AuditError("Não foi possível abrir o navegador incluído. Verifique se toda a pasta foi extraída e se o Windows permite executar seus componentes.") from exc
             raise AuditError("Não foi possível executar o navegador. Verifique o navegador instalado e o driver; a primeira execução precisa de internet para obtê-lo.") from exc
         finally:
             if driver:

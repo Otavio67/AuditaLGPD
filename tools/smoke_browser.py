@@ -5,6 +5,7 @@ de fixture. Esse transporte injetado não existe na configuração da aplicaçã
 """
 
 from contextlib import contextmanager
+import argparse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 import os
@@ -20,6 +21,12 @@ from auditalgpd.security import AuditError
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--portable", type=Path, help="Testar navegador/driver incluídos no pacote")
+    args = parser.parse_args()
+    if args.portable:
+        from auditalgpd.portable import configure_bundle
+        configure_bundle(args.portable.resolve())
     root = Path(__file__).resolve().parents[1]
     body = (root/"tests/fixtures/dynamic.html").read_bytes()
     class Fixture(BaseHTTPRequestHandler):
@@ -54,7 +61,7 @@ def main():
     os.environ["SE_AVOID_STATS"] = "true"
     try:
         with tempfile.TemporaryDirectory(prefix="audit-fixture-") as temp, patch("auditalgpd.browser_worker.public_proxy", fixture_proxy):
-            result = collect({"url":"http://fixture.example/", "browser":"edge", "profile":str(Path(temp)/"profile"), "timeout":50})
+            result = collect({"url":"http://fixture.example/", "browser":"chrome" if args.portable else "edge", "profile":str(Path(temp)/"profile"), "timeout":50})
         assert 'id="cookie-banner"' in result["html"], "O JavaScript não inseriu o aviso."
         assert "VALUE_MUST_NOT_BE_COLLECTED" not in result["html"]
         assert "COOKIE_VALUE_MUST_NOT_BE_SAVED" not in str(result["browser"])

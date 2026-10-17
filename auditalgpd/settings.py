@@ -15,7 +15,8 @@ class Settings:
             preferences = json.loads(self.path.read_text(encoding="utf-8"))
         except (OSError, ValueError):
             preferences = {}
-        self.browser = preferences.get("browser", "edge")
+        self.bundled = bool(os.environ.get("AUDITALGPD_BROWSER_BINARY") and os.environ.get("AUDITALGPD_BROWSER_DRIVER"))
+        self.browser = "chrome" if self.bundled else preferences.get("browser", "edge")
         self.model = preferences.get("model", os.environ.get("GEMINI_MODEL", "gemini-3.5-flash-lite"))
         self.api_key = os.environ.get("GEMINI_API_KEY", "")
 
@@ -24,6 +25,7 @@ class Settings:
             raise AuditError("Escolha Edge/Chrome e informe um identificador de modelo Gemini válido.")
         if len(key) > 250 or any(ord(c) < 32 for c in key):
             raise AuditError("O formato da chave não foi aceito.")
+        browser = "chrome" if self.bundled else browser
         self.browser, self.model = browser, model
         if clear:
             self.api_key = ""
@@ -35,4 +37,4 @@ class Settings:
         return GeminiClient(self.api_key, self.model)
 
     def public(self):
-        return {"browser": self.browser, "model": self.model, "configured": bool(self.api_key)}
+        return {"browser": self.browser, "model": self.model, "configured": bool(self.api_key), "bundled": self.bundled}
