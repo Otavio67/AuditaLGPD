@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "auditalgpd"
-version = "0.1.0"
+version = "0.2.0"
 description = "Diagnóstico técnico preliminar de sinais de privacidade em páginas web"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -12,6 +12,7 @@ dependencies = [
     "Flask>=3.1,<4",
     "beautifulsoup4>=4.13,<5",
     "reportlab>=4.4,<5",
+    "selenium>=4.27,<5",
 ]
 
 [tool.setuptools.packages.find]

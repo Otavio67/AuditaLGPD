@@ -1,0 +1,12 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Fixture dinâmica AuditaLGPD</title></head><body>
+<h1>Página controlada de teste</h1><p>O aviso será inserido por JavaScript.</p>
+<form><input type="email" name="email" value="VALUE_MUST_NOT_BE_COLLECTED"><a href="/privacidade">Política de privacidade</a></form>
+<script>
+setTimeout(() => {
+  const banner = document.createElement('aside');
+  banner.id = 'cookie-banner';
+  banner.innerHTML = 'Utilizamos cookies <button>Aceitar</button><button>Rejeitar</button><button>Configurar</button>';
+  document.body.appendChild(banner);
+  document.cookie = 'audit_fixture=COOKIE_VALUE_MUST_NOT_BE_SAVED; SameSite=Lax';
+}, 300);
+</script></body></html>
