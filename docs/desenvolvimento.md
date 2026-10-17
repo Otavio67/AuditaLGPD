@@ -30,3 +30,14 @@ Ao retomar a suíte completa, o teste de Host não autorizado identificou uma fa
 - Suíte ampliada para 37 testes locais aprovados; `pip check` sem dependências quebradas. Testes GitHub Actions dos commits 33c3569 e 04ae152 concluídos com sucesso. O resultado remoto de cada commit deve ser consultado no Actions.
 
 Permanecem pendentes: teste Gemini com chave real, experimentos de precisão, teste de escolhas/bloqueio/revogação de cookies, avaliação de processos internos LGPD e isolamento de sistema operacional. O TCC deve apresentar essas distinções.
+
+## Distribuição portátil — 17 de outubro de 2026
+
+- Gerado ZIP Windows x64 com Python embeddable 3.13.16, bibliotecas fixadas e Chromium Headless Shell/ChromeDriver 155.0.8059.84. Downloads oficiais conferidos por SHA-256, licenças preservadas e dados pessoais excluídos por seleção explícita das fontes.
+- Teste real de fixture com o Python e navegador incluídos: JavaScript inseriu o aviso, os controles e o cookie fictício foram detectados, a captura foi produzida e os valores de campos/cookies não foram coletados.
+- Corrigida a inicialização do Shell com perfil temporário: o driver cria seu próprio perfil dentro da pasta descartável controlada pela coleta. Não foi necessário relaxar TLS ou o proxy público.
+- `tools/smoke_portable.py` executado sobre o ZIP em uma pasta com espaços e acentos. PATH restrito ao sistema e PYTHONHOME/PYTHONPATH inválidos confirmaram o uso do runtime incluído. Launcher real, reabertura sem duplicar servidor, interface, SQLite, análises simples e avançada de example.com (sem erro de coleta), PNG e PDFs passaram. O ZIP original permaneceu sem dados de execução.
+- Suíte offline de 40 testes aprovada localmente. [GitHub Actions da revisão 912c22b](https://github.com/Otavio67/AuditaLGPD/actions/runs/39055744483) concluído com sucesso em seis combinações: Windows/Linux e Python 3.11/3.12/3.13.
+- ZIP validado: SHA-256 `0318d37e07bd587527d26794ba7fef9d9a85977283455ebf80d0115c8d73e9ce`. O manifesto interno registra a revisão e os hashes dos componentes.
+
+Essa validação confirma a relocação entre diretórios no mesmo PC; ainda não foi feita uma execução em segundo computador. O pacote é específico para Windows 10/11 x64, precisa de internet para consultar sites externos e de chave própria para o Gemini. Nenhuma chamada real ao Gemini foi necessária para empacotar ou validar esta entrega.
