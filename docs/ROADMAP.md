@@ -1,35 +1,13 @@
-# Plano de evolução
+# Evolução após a versão local 0.2
 
-A versão 0.1 implementa um diagnóstico baseado em HTML estático, com histórico e PDF. As etapas abaixo ainda não foram executadas e dependem de implementação e validação próprias.
+Já integrados: HTML e Selenium local, screenshot, metadados de cookies, rubrica explicável, progresso, interpretação Gemini opcional, histórico e PDF. A implementação não equivale a validação experimental de precisão.
 
-## 1. Melhorar a base de evidências
+1. **Validação para o TCC:** conjunto de páginas controladas e páginas autorizadas, referência humana, falsos positivos/negativos por critério, avaliação da IA, registro de modelo e repetibilidade. Comparar modos rápido/dinâmico sem inventar resultados.
+2. **Consentimento:** sessões separadas antes/depois de aceitar/rejeitar, revogação, cookies/rastreadores conhecidos e teste de bloqueio, com critérios explícitos de aplicabilidade. Não classificar automaticamente um domínio desconhecido como rastreador.
+3. **Cobertura:** shadow DOM/iframes, conteúdo carregado por interação, melhores regras para distinguir o corpo da política de outros textos e observação configurável com limites.
+4. **Uso local:** exclusão/retensão configurável do histórico e capturas, comparação de análises, exportação estruturada e cancelamento pelo usuário. A chave UI hoje é volátil por decisão de segurança/usabilidade.
+5. **IA:** teste real com chave do usuário, avaliação de aderência das citações ao tema, custo/latência, limites por conta e opção de provedor local. Nenhum modelo determina conformidade ou altera a nota sozinho.
+6. **Isolamento:** contenção em sistema operacional/contêiner e controle de egress fora do navegador. Proxy e flags atuais não equivalem a contenção hermética.
+7. **Hospedagem futura (fora do escopo local):** autenticação, isolamento de tarefas/usuários, armazenamento seguro, fila durável, limites de uso, WSGI/TLS e revisão antes de expor a aplicação.
 
-- Criar um conjunto de páginas controladas, com e sem banner, formulários e política, incluindo português e inglês.
-- Comparar os resultados com revisão humana e registrar falsos positivos e falsos negativos.
-- Distinguir visibilidade observada no navegador de indícios presentes apenas no HTML.
-- Implementar remoção de auditorias e uma política de retenção local.
-
-## 2. Renderização com Selenium
-
-- Isolar o navegador coletor em processo/ambiente separado e restringir sua rede. A validação do HTTP atual não protege as requisições feitas por um navegador que executa JavaScript.
-- Estabelecer limites de páginas, tempo, memória e tamanho de evidências.
-- Capturar estados antes e depois de escolhas de consentimento em páginas autorizadas, sem enviar formulários com dados pessoais.
-- Testar coleta e bloqueio de cookies/rastreadores com cenários reproduzíveis.
-
-## 3. Análise assistida por IA
-
-- Definir provedor/modelo e requisitos de custo, privacidade e retenção antes de qualquer integração.
-- Separar instruções da aplicação de textos não confiáveis dos sites; não permitir que políticas ou páginas emitam comandos para o sistema.
-- Solicitar observações estruturadas com trechos de evidência e possibilidade de abstenção.
-- Avaliar as respostas com casos revisados por humanos. A IA não deve emitir certificação automática de conformidade.
-
-## 4. Preparar eventual hospedagem
-
-- Adicionar autenticação, autorização e isolamento de dados entre usuários.
-- Adicionar filas, limites por usuário, controles de saída de rede, limites rígidos por tarefa e monitoramento.
-- Revisar retenção, exclusão e tratamento de URLs e evidências.
-- Usar servidor de produção, TLS e armazenamento protegido; executar revisão de segurança antes de exposição pública.
-
-## Relação com o TCC
-
-Registrar no artigo somente as funcionalidades implementadas e as validações efetivamente realizadas. Uma suíte de testes técnicos não demonstra, por si só, eficácia jurídica nem qualidade de um modelo de IA. Resultados experimentais de Selenium e LLM devem ser apresentados apenas depois dos experimentos.
+O TCC deve distinguir funções implementadas, testes controlados, teste externo funcional e experimentos de precisão ainda não realizados.

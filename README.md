@@ -1,32 +1,29 @@
 # AuditaLGPD
 
-Ferramenta web acadêmica para diagnóstico técnico preliminar de sinais de privacidade em páginas públicas. Primeira implementação do projeto de TCC, com Python, Flask, Beautiful Soup, SQLite e ReportLab.
+Aplicação web local para diagnóstico técnico preliminar de sinais de privacidade em páginas públicas. Projeto acadêmico de TCC desenvolvido com Python, Flask, Selenium, Beautiful Soup, SQLite e ReportLab. Interpretação de políticas opcional com Google Gemini.
 
-**A ferramenta não certifica conformidade com a LGPD e não substitui avaliação humana.** Os resultados descrevem o HTML observado em uma consulta; não são pareceres jurídicos.
+**A nota mede sinais observáveis segundo uma rubrica acadêmica. Não certifica conformidade com a LGPD.** Processos internos e a validade jurídica dos tratamentos exigem avaliação humana.
 
-![Página inicial do AuditaLGPD](docs/imagens/inicio.jpg)
+![Relatório demonstrativo](docs/imagens/relatorio-v02.png)
 
-## O que já funciona
+## Recursos da versão 0.2
 
-| Recurso | Situação nesta versão |
-| --- | --- |
-| Entrada e validação de URL pública | Implementado |
-| HTTPS com validação do certificado TLS | Implementado |
-| Indícios de banner de cookies no HTML estático | Implementado, por heurística |
-| Indícios de campos de dados pessoais em formulários | Implementado, sem preencher ou enviar |
-| Localização de link de política de privacidade | Implementado, por texto do link |
-| Recuperação do texto de uma política da mesma origem | Implementado; não avalia o significado do texto |
-| Histórico local em SQLite e relatório PDF | Implementado |
-| Página de demonstração sem acesso à rede | Implementado, explicitamente identificada |
-| Selenium, execução de JavaScript e teste de consentimento | Planejado |
-| Avaliação de políticas com LLM | Planejado; nenhum provedor de IA é chamado |
-| Contas, separação de usuários e implantação pública | Fora do escopo desta versão local |
+- Interface com nota A–E, indicadores por assunto, cobertura, evidências e orientações de melhoria.
+- Coleta rápida de HTML ou coleta dinâmica com Selenium em Edge/Chrome local, com perfil temporário e captura de tela.
+- Observação de cookies antes de interação: nome, domínio e atributos, sem guardar valores. Domínios são derivados dos eventos da página atual; tráfego de inicialização do navegador é excluído.
+- Identificação heurística de HTTPS, avisos, formulários, política e sete temas de transparência.
+- Rubrica de 12 critérios, pesos somando 100, versão gravada com cada análise e cobertura mínima de 60% para nota.
+- Interpretação opcional pelo Gemini, com resposta estruturada e descarte de citações que não existam no texto enviado. A IA não altera a nota.
+- Progresso por etapa, uma coleta de cada vez, histórico SQLite e PDF com nota, evidências e limitações.
+- Chave Gemini informada pela interface mantida somente na memória desta execução, nunca no GitHub. Preferências sem segredo ficam em `instance/preferences.json`.
 
-Os estados são **Identificado**, **Não identificado**, **Erro na verificação** e **Não executado**. Uma falha de conexão não vira conclusão sobre ausência de um recurso. Não há porcentagem de conformidade.
+Os estados **Identificado** (verde), **Não identificado** (vermelho), **Erro** (laranja) e **Não executado** (cinza) descrevem detecção. Identificar um formulário ou cookie não é aprová-lo juridicamente. Erro de conexão não recebe nota como se fosse página vazia.
+
+Leia [metodologia e referências](docs/metodologia.md) para os pesos, limiares, bases consultadas e limitações. [Cookiebot](https://www.cookiebot.com/en/cookie-checker/) e [CookieYes](https://www.cookieyes.com/cookie-scanner/) foram pesquisados como referências de inventário e relatório; [GTmetrix](https://gtmetrix.com/) foi referência de organização visual. Não houve validação comparativa de precisão nem cópia de marcas/ativos.
 
 ## Executar no Windows
 
-Pré-requisitos: Python 3.11 ou superior e Git. No PowerShell, dentro da pasta do projeto:
+Pré-requisitos: Python 3.11+, Git e Edge ou Chrome instalado para a coleta dinâmica.
 
 ```powershell
 py -3 -m venv .venv
@@ -35,50 +32,41 @@ py -3 -m venv .venv
 .\.venv\Scripts\python.exe -m flask --app auditalgpd run --host 127.0.0.1 --port 5000
 ```
 
-Abra **http://127.0.0.1:5000/**. Para parar, pressione `Ctrl+C` no terminal do servidor. Depois da instalação, também é possível iniciar com `iniciar.cmd`.
+Abra [a aplicação local](http://127.0.0.1:5000/). Também é possível iniciar com `iniciar.cmd` após a instalação. Para atualizar uma instalação existente, execute os dois comandos de instalação e reinicie o servidor (`Ctrl+C` na janela antiga, depois `iniciar.cmd`).
 
-Em Linux/macOS, use `python3 -m venv .venv` e substitua `.\.venv\Scripts\python.exe` por `.venv/bin/python` nos comandos seguintes.
+Linux/macOS: substitua o executável por `.venv/bin/python` e crie o ambiente com `python3 -m venv .venv`. Escolha Chrome se Edge não estiver instalado. O navegador completo foi validado manualmente em Windows/Edge; a suíte offline cobre Linux/Windows no CI.
 
-O arquivo `requirements-lock.txt` registra as versões instaladas e testadas nesta primeira implementação. Para desenvolvimento com versões compatíveis dentro das faixas do projeto, pode-se usar `python -m pip install -r requirements.txt` no ambiente virtual.
+O Selenium Manager pode baixar o driver oficial na primeira execução, em `instance/selenium`. A internet continua necessária para analisar sites externos. O perfil temporário é encerrado ao fim da coleta; nenhum perfil pessoal é utilizado.
 
-### Chave de sessão
+## Como usar
 
-Sem configuração, uma chave aleatória é criada a cada inicialização. Isso encerra a validade dos formulários abertos antes de reiniciar o servidor. Para manter a sessão entre reinicializações, defina uma chave local:
+1. Abra **Configurações** e selecione o navegador instalado.
+2. Informe a página pública e escolha coleta completa ou rápida.
+3. Confirme a autorização para analisar e inicie.
+4. Confira nota/cobertura, evidências, sugestões e os critérios ainda pendentes.
+5. Exporte PDF ou consulte o histórico. A demonstração usa dados fictícios e não consulta sites.
 
-```powershell
-$env:AUDITALGPD_SECRET_KEY = 'substitua-por-uma-chave-aleatoria-local'
-```
+### Ativar Gemini
 
-Gere a chave com `python -c "import secrets; print(secrets.token_hex(32))"` no ambiente virtual. Não publique a chave. `.env.example` é apenas referência: esta aplicação não carrega arquivos `.env` automaticamente.
+Em **Configurações**, informe uma chave do seu projeto no [Google AI Studio](https://aistudio.google.com/api-keys) e um [modelo disponível](https://ai.google.dev/gemini-api/docs/models). O padrão configurável é `gemini-3.5-flash-lite`, consultado na documentação oficial em 17/10/2026. Não cole a chave em issues, commits ou mensagens.
 
-## Usar
+A chave digitada fica na memória do processo Flask e precisa ser informada novamente depois de encerrá-lo. É possível fornecer `GEMINI_API_KEY` e `GEMINI_MODEL` por variáveis de ambiente; o aplicativo não carrega `.env` automaticamente. O campo da chave nunca é preenchido de volta na interface.
 
-1. Informe uma página pública de um site que você tenha autorização para analisar.
-2. Confirme a autorização e selecione **Analisar site**.
-3. Consulte cada verificação e suas evidências.
-4. Baixe o PDF ou consulte a análise em **Histórico**.
+Marque **Incluir interpretação com Gemini** a cada análise. Isso envia ao Google até 24.000 caracteres do texto da política, com remoção básica de e-mails, CPFs e telefones. Essa remoção não garante anonimização completa. Imagens, cookies e valores de formulários não são enviados. A política inteira pode exceder o limite; a interface informa truncamento.
 
-A opção **Explorar um resultado de demonstração** usa HTML fictício embutido, sem consultar sites ou salvar auditorias. A rota `/health` informa se a aplicação está respondendo.
+O Gemini é externo: o processamento por IA não ocorre no computador. Aplicam-se as condições de dados, cotas e eventual cobrança do projeto Google. Sem chave/ativação, não há chamada ao provedor. Não há novas tentativas automáticas de consumo de cota. A integração foi validada com respostas simuladas; o uso real depende de uma chave e modelo disponíveis na conta do usuário.
 
-## Estrutura
+## Escopo e controles
 
-```text
-auditalgpd/
-  __init__.py       Fábrica Flask e configuração
-  security.py       Validação de URL, DNS e coleta HTTP limitada
-  detectors.py      Heurísticas sobre HTML estático
-  audit.py          Orquestração e estados de resultado
-  domain.py         Modelos e remoção de parâmetros das URLs
-  storage.py        Persistência SQLite
-  reports.py        Geração de PDF
-  web.py            Rotas, sessão e proteção de formulários
-  demo.py           Resultado demonstrativo
-  templates/        Páginas em português
-  static/           Estilos e interação do formulário
-tests/              Testes sem depender de sites externos
-docs/               Arquitetura, escopo e evolução
-instance/           Banco local, criado em execução e ignorado pelo Git
-```
+- Uso individual em `127.0.0.1`; não publique o servidor Flask na rede. Não há autenticação/múltiplos usuários.
+- Uma página e até uma política da mesma origem (até três candidatos). Não é rastreamento do domínio inteiro. A política usa o mesmo modo de coleta escolhido.
+- HTTP: DNS público validado, IP fixado por conexão, redirecionamentos revalidados, TLS padrão, até 2 MB de HTML e orçamento de 20 segundos.
+- Selenium: processo separado com limite de 65 segundos por coleta, perfil temporário, download de arquivos negado, TLS mantido e saída por proxy local. O proxy valida DNS/conecta ao IP aprovado, restringe portas e tem limites de conexões e tráfego de 20 MB. Pode bloquear recursos e reduzir a completude. É uma redução de risco, não isolamento de sistema operacional.
+- A captura dinâmica aguarda o carregamento e observa por mais três segundos. Conteúdo tardio, interações, iframes especiais e shadow DOM podem não ser analisados integralmente.
+- Não clica em escolhas de consentimento, não preenche/envia formulários, não usa login e não classifica automaticamente todos os rastreadores/cookies. Rejeição/revogação e bloqueio antes do consentimento continuam pendentes de validação.
+- O HTML integral e valores de campos não são persistidos. URLs no histórico excluem query, fragmento e credenciais; caminhos ainda podem conter identificadores. Evidências textuais e capturas públicas podem conter dados: proteja seus arquivos locais. O SQLite não é criptografado.
+- `instance/`, `.env`, banco, perfis e caches são ignorados pelo Git. Publicar código não publica o histórico. A chave de sessão é aleatória por execução; opcionalmente defina `AUDITALGPD_SECRET_KEY` no ambiente para mantê-la estável.
+- A fila e o progresso são locais e em memória. Reiniciar o aplicativo interrompe tarefas pendentes; relatórios já salvos permanecem no SQLite.
 
 ## Testes
 
@@ -86,18 +74,20 @@ instance/           Banco local, criado em execução e ignorado pelo Git
 .\.venv\Scripts\python.exe -m unittest discover -v
 ```
 
-Os testes cobrem bloqueio de redes privadas e respostas DNS mistas, redirecionamentos, limites de coleta, detecção de HTML, persistência, proteção de formulário, escape de conteúdo e download de PDF. As respostas dos sites são simuladas nos testes automatizados. Um teste manual adicional consultou `https://example.com/` e concluiu uma conexão HTTPS real com validação do certificado.
+A suíte não requer API Gemini nem sites externos. Cobre URL/DNS/redirecionamentos, proxy, remoção de valores de cookies, rubrica/cobertura, citações inventadas, chave fora do disco/HTML, CSRF, progresso/concorrência, persistência e PDF. O workflow `.github/workflows/tests.yml` usa Linux/Windows e Python 3.11/3.12.
 
-O fluxo em `.github/workflows/tests.yml` executa a suíte em Linux e Windows, com Python 3.11 e 3.12. As ações oficiais [checkout](https://github.com/actions/checkout) e [setup-python](https://github.com/actions/setup-python) foram fixadas por identificador de commit.
+Teste manual opt-in com navegador real (pode baixar o driver):
 
-## Escopo e limites
+```powershell
+.\.venv\Scripts\python.exe tools/smoke_browser.py
+```
 
-- Uso local e individual: mantenha o servidor em `127.0.0.1`. O repositório é público; o histórico local não é enviado ao GitHub. Esta aplicação ainda não tem autenticação, isolamento por usuário, fila ou limitação de requisições para uma implantação pública.
-- Consulta a página informada, com até três redirecionamentos, e tenta recuperar **uma** política vinculada da mesma origem. Até três links candidatos podem ser tentados. O site inteiro não é rastreado.
-- Aceita somente HTTP/HTTPS em portas padrão, sem credenciais. Recusa IPs privados, locais e reservados; valida as respostas DNS e conecta ao IP validado. Cada destino de redirecionamento é validado novamente. A política não pode sair da origem da página final.
-- Coleta até 2 MB por resposta HTML, com limite de espera por conexão/leitura e orçamento de 20 segundos por auditoria. O tempo total pode exceder esse orçamento em operações do sistema, como resolução DNS; não é um limite rígido de execução.
-- Não executa JavaScript, não autentica em sites, não aceita cookies e não envia formulários. Conteúdo dependente de JavaScript, CSS externo ou condições de acesso pode gerar resultados incompletos. Servidores que exigem compressão podem não ser analisados.
-- Não armazena o HTML completo nem valores de campos. URLs persistidas e exibidas não incluem parâmetros de consulta, fragmentos ou credenciais; o caminho da URL é preservado e ainda pode conter informação sensível. O banco não é criptografado: use apenas URLs apropriadas para esse registro e proteja os arquivos locais.
-- Presença de banner, formulário ou política não comprova adequação. Ausência de um banner, isoladamente, não comprova irregularidade. O comportamento dos cookies e a validade do consentimento ainda não são testados.
+Ele injeta um transporte exclusivo de teste para uma fixture local: insere um banner via JavaScript, grava um cookie fictício e verifica DOM renderizado, controles, captura e remoção de valores. Esse redirecionamento de teste não existe na configuração da aplicação. Também foi concluída uma coleta externa real de `https://example.com/` com resposta HTTP 200, captura e exclusão do tráfego de inicialização do Edge.
 
-Leia [arquitetura](docs/arquitetura.md), [plano de evolução](docs/ROADMAP.md) e [registro de desenvolvimento](docs/desenvolvimento.md). Código sob [licença MIT](LICENSE).
+## Organização
+
+`audit.py` orquestra a coleta; `security.py` faz a coleta HTTP; `browser*.py` isolam Selenium/proxy; `detectors.py` e `assessment.py` produzem evidências/rubrica; `gemini.py` interpreta trechos; `jobs.py` organiza progresso; `settings.py` mantém preferências; `storage.py` persiste; `reports.py` gera PDF; `web.py`, `templates/` e `static/` oferecem a interface.
+
+Consulte [arquitetura](docs/arquitetura.md), [roteiro de evolução](docs/ROADMAP.md) e [registro de desenvolvimento](docs/desenvolvimento.md).
+
+MIT. Projeto acadêmico em evolução; resultados de experimentos de precisão ainda precisam ser produzidos para o TCC.
