@@ -1,27 +1,39 @@
 {% extends 'base.html' %}
 {% block content %}
-<section class="hero"><p class="eyebrow"><span class="dot"></span> PRIVACIDADE COMEÇA COM VISIBILIDADE</p>
-  <h1>Um primeiro olhar sobre<br>a privacidade do seu site.</h1>
-  <p class="lead">Identifique sinais técnicos relacionados à privacidade e organize evidências para a sua avaliação.</p>
+<section class="hero">
+  <p class="eyebrow"><span class="live-dot"></span> DIAGNÓSTICO LOCAL DE PRIVACIDADE</p>
+  <h1>Conheça os sinais de<br>privacidade do seu site<span class="blue">.</span></h1>
+  <p class="lead">Uma visão clara do que foi identificado, do que merece atenção e do que ainda precisa de uma avaliação humana.</p>
 </section>
 <div class="home-grid">
-  <section class="panel audit-form"><div class="panel-heading"><span class="step">01</span><div><h2>Iniciar diagnóstico</h2><p>Informe a página pública que deseja analisar.</p></div></div>
+  <section class="panel audit-form">
+    <div class="panel-heading"><span class="step">↗</span><div><h2>Analise uma página</h2><p>Da URL ao relatório, no seu computador.</p></div></div>
     {% if error %}<div class="alert error" role="alert">{{ error }}</div>{% endif %}
+    <div id="form-error" class="alert error" role="alert" hidden></div>
     <form action="{{ url_for('web.create') }}" method="post" id="audit-form">
       <input type="hidden" name="csrf" value="{{ csrf_token }}">
       <label for="url">Endereço do site</label>
       <input id="url" name="url" type="text" inputmode="url" autocomplete="url" placeholder="https://seusite.com.br" value="{{ entered_url }}" required maxlength="2048" aria-describedby="url-help">
-      <p id="url-help" class="hint">Somente páginas públicas HTTP ou HTTPS, em portas padrão.</p>
+      <p id="url-help" class="hint">Uma página pública HTTP ou HTTPS, sem login.</p>
+      <label for="mode">Como deseja analisar?</label>
+      <select id="mode" name="mode"><option value="browser">Completa · navegador local com Selenium</option><option value="static">Rápida · somente HTML, sem JavaScript</option></select>
+      <p class="hint">Na primeira coleta com Selenium, pode ser necessário baixar o driver do {{ local_settings.browser | capitalize }}.</p>
+      <label class="checkbox ai-option"><input type="checkbox" name="use_ai" value="yes" {% if not local_settings.configured %}disabled{% endif %}><span><strong>Incluir interpretação com Gemini</strong><br>Envia ao Google até 24 mil caracteres do texto da política, com remoção básica de alguns identificadores. {% if not local_settings.configured %}<a href="{{ url_for('web.settings') }}">Configure sua chave para ativar.</a>{% else %}Modelo: {{ local_settings.model }}. Uso sujeito à cota e às condições da sua conta.{% endif %}</span></label>
       <label class="checkbox"><input type="checkbox" name="authorized" value="yes" required><span>Sou responsável pelo site ou tenho autorização para realizar esta análise.</span></label>
-      <button type="submit" class="button primary" id="submit-audit">Analisar site <span aria-hidden="true">↗</span></button>
-      <p class="hint progress" id="progress" role="status" aria-live="polite">A análise consulta a página e uma política vinculada, quando disponível.</p>
-      <p class="hint"><a href="{{ url_for('web.demo') }}">Explorar um resultado de demonstração →</a></p>
+      <button type="submit" class="button primary" id="submit-audit">Analisar privacidade <span aria-hidden="true">→</span></button>
+      <p class="hint progress" id="progress" role="status" aria-live="polite">Histórico, evidências e relatórios ficam nesta instalação local.</p>
+      <a class="demo-link" href="{{ url_for('web.demo') }}">Ver um relatório de demonstração ↗</a>
     </form>
   </section>
-  <aside class="scope"><p class="eyebrow">O QUE ESTA VERSÃO OBSERVA</p>
-    <ul class="scope-list"><li><span class="scope-symbol">↗</span><div><h3>Conexão HTTPS</h3><p>Uso de conexão segura e validação do certificado.</p></div></li><li><span class="scope-symbol">◫</span><div><h3>Cookies e formulários</h3><p>Indícios de banner e campos de dados pessoais no HTML.</p></div></li><li><span class="scope-symbol">≡</span><div><h3>Política de privacidade</h3><p>Localização do link e tentativa de acesso ao texto.</p></div></li></ul>
-    <p class="scope-note">A ferramenta não certifica conformidade com a LGPD. JavaScript e análise por IA ainda não estão integrados.</p>
+  <aside class="scope">
+    <p class="eyebrow">EVIDÊNCIAS PARA DECIDIR O PRÓXIMO PASSO</p>
+    <ul class="scope-list">
+      <li><span class="scope-symbol">01</span><div><h3>Uma nota com critérios claros</h3><p>Pesos publicados, cobertura da análise e resultados organizados por assunto.</p></div></li>
+      <li><span class="scope-symbol">02</span><div><h3>A página como o navegador a vê</h3><p>JavaScript, captura da tela, avisos e cookies em uma sessão temporária.</p></div></li>
+      <li><span class="scope-symbol">03</span><div><h3>O que revisar e como melhorar</h3><p>Orientações por critério, trechos encontrados e interpretação opcional da política.</p></div></li>
+    </ul>
+    <div class="scope-note"><strong>O alcance da nota</strong><p>A nota mede sinais observáveis em uma página e uma política. A conformidade com a LGPD também depende de processos internos e revisão humana.</p></div>
   </aside>
 </div>
-<section class="workflow" aria-label="Como funciona"><div><span>01 / INFORME</span><p>Uma URL pública autorizada</p></div><div><span>02 / OBSERVE</span><p>Verificações com evidências</p></div><div><span>03 / DOCUMENTE</span><p>Histórico local e relatório PDF</p></div></section>
+<section class="workflow" aria-label="Como funciona"><div><span>01 / INFORME</span><p>Uma página pública autorizada</p></div><div><span>02 / ENTENDA</span><p>Nota, evidências e pontos de atenção</p></div><div><span>03 / ACOMPANHE</span><p>Histórico local e relatório em PDF</p></div></section>
 {% endblock %}

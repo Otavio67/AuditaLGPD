@@ -10,7 +10,7 @@
   <a class="skip" href="#conteudo">Ir para o conteúdo</a>
   <header class="topbar"><div class="nav-wrap">
     <a class="brand" href="{{ url_for('web.home') }}"><span class="brand-icon" aria-hidden="true">A</span> Audita<span>LGPD</span></a>
-    <nav aria-label="Navegação principal"><a href="{{ url_for('web.home') }}">Nova auditoria</a><a href="{{ url_for('web.history') }}">Histórico</a><span class="version">MVP 0.1</span></nav>
+    <nav aria-label="Navegação principal"><a href="{{ url_for('web.home') }}">Nova análise</a><a href="{{ url_for('web.history') }}">Histórico</a><a href="{{ url_for('web.settings') }}">Configurações</a><span class="version">LOCAL · 0.2</span></nav>
   </div></header>
   <main id="conteudo" class="container">{% block content %}{% endblock %}</main>
   <footer class="footer"><span>AuditaLGPD <span aria-hidden="true">/</span> Projeto acadêmico</span><span>Diagnóstico técnico preliminar. Exige interpretação humana.</span></footer>

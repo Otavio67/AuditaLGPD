@@ -33,3 +33,7 @@ class AssessmentTests(unittest.TestCase):
         soup = parse_html('<div id="cookie-banner">Cookies <button>Aceitar</button><button>Rejeitar</button><button>Configurar</button></div>')
         self.assertEqual(contextual_checks(soup, browser=True)[1].status, Status.PRESENT)
         self.assertEqual(contextual_checks(soup, browser=False)[1].status, Status.NOT_RUN)
+
+    def test_one_notice_does_not_approve_other_personal_forms(self):
+        soup = parse_html('<form><input type="email"><a>Política de privacidade</a></form><form><input type="tel"></form>')
+        self.assertEqual(contextual_checks(soup)[0].status, Status.ABSENT)

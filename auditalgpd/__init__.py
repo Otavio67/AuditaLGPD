@@ -26,6 +26,6 @@ def create_app(test_config=None):
 
     @app.get("/health")
     def health():
-        return {"status": "ok", "application": "AuditaLGPD", "version": "0.1.0"}
+        return {"status": "ok", "application": "AuditaLGPD", "version": "0.2.0"}
 
     return app

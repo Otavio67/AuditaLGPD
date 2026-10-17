@@ -3,7 +3,7 @@
 import re
 import unicodedata
 from .domain import Check, Status
-from .detectors import visible
+from .detectors import visible, detect_banner
 
 
 def fold(text):
@@ -67,16 +67,19 @@ def policy_topics(text, unavailable=Status.NOT_RUN):
 
 def contextual_checks(soup, browser=False):
     forms = [f for f in soup.find_all("form") if visible(f)]
-    personal = any(c.get("type", "").lower() in {"email", "tel", "password"} or
-                   re.search(r"nome|name|cpf|email|telefone", str(c.get("name", "")), re.I)
-                   for f in forms for c in f.find_all("input") if visible(c))
-    notices = [f for f in forms if re.search(r"privacidade|privacy|dados pessoais", f.get_text(" ", strip=True), re.I)]
-    form_status = Status.PRESENT if notices else Status.ABSENT
-    if not personal:
+    def personal(form):
+        return any(c.get("type", "text").lower() not in {"hidden", "search", "submit", "button", "checkbox", "radio"} and
+                   (c.get("type", "text").lower() in {"email", "tel", "password"} or
+                    re.search(r"nome|name|cpf|email|telefone|phone|birth|endereco|address", " ".join(str(c.get(a, "")) for a in ["name", "id", "autocomplete"]), re.I))
+                   for c in form.find_all("input") if visible(c))
+    personal_forms = [f for f in forms if personal(f)]
+    notices = [f for f in personal_forms if re.search(r"privacidade|privacy|dados pessoais", f.get_text(" ", strip=True), re.I)]
+    form_status = Status.PRESENT if len(notices) == len(personal_forms) else Status.ABSENT
+    if not personal_forms:
         form_status = Status.NOT_RUN
     form_check = Check("form_notice", "Informação próxima ao formulário", form_status,
-                       "Há referência textual à privacidade dentro de um formulário. Avalie a clareza e a finalidade informada." if notices and personal else
-                       "Há indícios de coleta, mas não foi localizada uma referência à privacidade dentro do formulário." if personal else
+                       f"Há referência à privacidade em {len(notices)}/{len(personal_forms)} formulário(s) de dados pessoais identificado(s). Avalie clareza e finalidade." if form_status == Status.PRESENT else
+                       f"Referência à privacidade localizada em {len(notices)}/{len(personal_forms)} formulário(s) com indícios de coleta." if personal_forms else
                        "Não foi identificado formulário de dados pessoais; aplicabilidade pendente de revisão.")
     banners = []
     for el in soup.find_all(["div", "aside", "section", "dialog"]):
@@ -86,7 +89,7 @@ def contextual_checks(soup, browser=False):
     controls = " ".join(fold(b.get_text(" ", strip=True)) for banner in banners for b in banner.find_all(["button", "a", "input"]) if visible(b))
     choices = all(re.search(pattern, controls) for pattern in [r"aceit|accept|permitir todos", r"rejeit|recus|reject|necessarios|deny", r"configur|preferenc|personaliz|settings|manage"])
     # A ausência do banner não permite inferir sua obrigatoriedade.
-    status = (Status.PRESENT if choices else Status.ABSENT) if banners and browser else Status.NOT_RUN
+    status = (Status.PRESENT if choices else Status.ABSENT) if banners and browser and detect_banner(soup).status == Status.PRESENT else Status.NOT_RUN
     cookie_check = Check("cookie_choices", "Escolhas no aviso de cookies", status,
                          "Foram localizados controles de aceitar, rejeitar e configurar. Não houve clique nem teste de bloqueio/revogação." if status == Status.PRESENT else
                          "Não foram localizados os três tipos de controle no aviso observado. Verifique sua aplicabilidade e funcionamento." if status == Status.ABSENT else

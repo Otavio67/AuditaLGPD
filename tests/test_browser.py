@@ -1,7 +1,8 @@
 import unittest
+import json
 from unittest.mock import Mock
 from auditalgpd.browser_proxy import proxy_target, PublicProxy
-from auditalgpd.browser_worker import cookie_inventory, page_cookies
+from auditalgpd.browser_worker import cookie_inventory, page_cookies, page_network
 from auditalgpd.security import UnsafeURL
 
 
@@ -30,3 +31,11 @@ class BrowserSafetyTests(unittest.TestCase):
         cookies = [{"name":"background", "domain":".bing.com"}, {"name":"page", "domain":".example.org"}]
         self.assertEqual([c["name"] for c in page_cookies(cookies, ["www.example.org"])], ["page"])
         self.assertEqual(page_cookies(cookies, ["notexample.org"]), [])
+
+    def test_network_events_from_old_page_are_not_attributed_to_current_loader(self):
+        def request(url, loader):
+            return {'message':json.dumps({'message':{'method':'Network.requestWillBeSent','params':{
+                'frameId':'main','loaderId':loader,'request':{'url':url}}}})}
+        events = [request('https://ntp.msn.com/old', 'old'), request('https://example.org/current', 'new')]
+        domains, _ = page_network(events, {'main':'new'}, 'main')
+        self.assertEqual(domains, ['example.org'])
