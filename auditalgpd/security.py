@@ -1,6 +1,6 @@
 """Coleta pública limitada, com DNS validado e conexão ao IP verificado."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import http.client
 import ipaddress
 import re
@@ -110,6 +110,7 @@ class Page:
     url: str
     html: str
     tls_verified: bool
+    browser: dict = field(default_factory=dict)
 
 
 class SafeFetcher:

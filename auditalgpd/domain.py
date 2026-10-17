@@ -1,4 +1,4 @@
-"""Resultados observáveis, sem notas de conformidade jurídica."""
+"""Resultados observáveis e metadados da metodologia versionada."""
 
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
@@ -42,6 +42,11 @@ class AuditResult:
     limitations: list[str] = field(default_factory=list)
     duration_ms: int = 0
     demo: bool = False
+    mode: str = "static"
+    browser: dict = field(default_factory=dict)
+    ai: dict = field(default_factory=dict)
+    score: dict = field(default_factory=dict)
+    methodology: str = "observaveis-1.0"
 
     def to_dict(self):
         return asdict(self)
