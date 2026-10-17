@@ -14,7 +14,7 @@ Aplicação web local para diagnóstico técnico preliminar de sinais de privaci
 - Identificação heurística de HTTPS, avisos, formulários, política e sete temas de transparência.
 - Rubrica de 12 critérios, pesos somando 100, versão gravada com cada análise e cobertura mínima de 60% para nota.
 - Interpretação opcional pelo Gemini, com resposta estruturada e descarte de citações que não existam no texto enviado. A IA não altera a nota.
-- Progresso por etapa, uma coleta de cada vez, histórico SQLite e PDF com nota, evidências e limitações.
+- Progresso por etapa, uma coleta de cada vez, histórico SQLite e PDF com capa visual, nota, indicadores, estados em cores, evidências e limitações.
 - Chave Gemini informada pela interface mantida somente na memória desta execução, nunca no GitHub. Preferências sem segredo ficam em `instance/preferences.json`.
 
 Os estados **Identificado** (verde), **Não identificado** (vermelho), **Erro** (laranja) e **Não executado** (cinza) descrevem detecção. Identificar um formulário ou cookie não é aprová-lo juridicamente. Erro de conexão não recebe nota como se fosse página vazia.
@@ -41,10 +41,14 @@ O Selenium Manager pode baixar o driver oficial na primeira execução, em `inst
 ## Como usar
 
 1. Abra **Configurações** e selecione o navegador instalado.
-2. Informe a página pública e escolha coleta completa ou rápida.
+2. Informe a página pública e escolha **Análise simples** ou **Análise avançada**. A simples consulta o HTML; a avançada também observa o conteúdo carregado no navegador e registra cookies/captura.
 3. Confirme a autorização para analisar e inicie.
 4. Confira nota/cobertura, evidências, sugestões e os critérios ainda pendentes.
 5. Exporte PDF ou consulte o histórico. A demonstração usa dados fictícios e não consulta sites.
+
+O PDF segue a identidade visual da aplicação, com fontes incorporadas, cabeçalho/rodapé, indicadores na primeira página e tabelas com cabeçalhos repetidos quando ocupam mais de uma página. Evidências e registros históricos são preservados; a apresentação usa linguagem simples para as modalidades de análise.
+
+![Capa demonstrativa do relatório PDF](docs/imagens/relatorio-pdf.png)
 
 ### Ativar Gemini
 
