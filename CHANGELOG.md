@@ -1,5 +1,15 @@
 # Alterações
 
+## Rubrica observaveis-2.0 — 20/11/2026
+
+- Toda coleta concluída recebe nota (A–E); o mínimo de 60% de cobertura deixou de bloquear a nota.
+- Com cobertura abaixo de 60%, a letra fica limitada a C.
+- Sem link de política (e quando a página não é a própria política), o acesso ao texto e os sete temas contam como não identificados.
+- Quando a URL analisada é a própria política, seu texto é avaliado.
+- Na análise avançada, um bloqueio ou falha do navegador leva automaticamente à análise simples, com registro no relatório.
+- Heurística reconhece formulações comuns de retenção ("por quanto tempo mantemos", "dados conservados") e de direitos ("direitos sobre seus dados").
+- Análises antigas mantêm a versão da rubrica gravada. Suíte com 49 testes.
+
 ## Dependências — 20/11/2026
 
 - reportlab 5.1.0, pillow 13.0.0, soupsieve 4.1.3, selenium 4.53.0 e atualizações menores (trio, certifi, click, pycparser); limite do reportlab ampliado para `<6`.

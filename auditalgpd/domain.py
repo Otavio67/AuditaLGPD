@@ -46,7 +46,7 @@ class AuditResult:
     browser: dict = field(default_factory=dict)
     ai: dict = field(default_factory=dict)
     score: dict = field(default_factory=dict)
-    methodology: str = "observaveis-1.0"
+    methodology: str = "observaveis-2.0"
 
     def to_dict(self):
         return asdict(self)

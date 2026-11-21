@@ -12,7 +12,7 @@ Aplicação web local para diagnóstico técnico preliminar de sinais de privaci
 - Coleta rápida de HTML ou coleta dinâmica com Selenium em Edge/Chrome local, com perfil temporário e captura de tela.
 - Observação de cookies antes de interação: nome, domínio e atributos, sem guardar valores. Domínios são derivados dos eventos da página atual; tráfego de inicialização do navegador é excluído.
 - Identificação heurística de HTTPS, avisos, formulários, política e sete temas de transparência.
-- Rubrica de 12 critérios, pesos somando 100, versão gravada com cada análise e cobertura mínima de 60% para nota.
+- Rubrica de 12 critérios, pesos somando 100, versão gravada com cada análise e nota atribuída a toda coleta concluída, com a cobertura exibida ao lado.
 - Interpretação opcional pelo Gemini, com resposta estruturada e descarte de citações que não existam no texto enviado. A IA não altera a nota.
 - Progresso por etapa, uma coleta de cada vez, histórico SQLite e PDF com capa visual, nota, indicadores, estados em cores, evidências e limitações.
 - Chave Gemini informada pela interface mantida somente na memória desta execução, nunca no GitHub. Preferências sem segredo ficam em `instance/preferences.json`.

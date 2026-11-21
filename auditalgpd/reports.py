@@ -239,7 +239,7 @@ def generate_pdf(audit):
     if audit.demo:
         story += [notice("DEMONSTRAÇÃO - dados fictícios para apresentar o relatório. Nenhum site foi consultado.", colors.HexColor("#fff6e2")), Spacer(1, 10)]
     story += [ScorePanel(width, score), Spacer(1, 12),
-              notice("A nota resume apenas os critérios que puderam ser avaliados. Não representa aprovação jurídica do site. Itens sem conclusão não entram no cálculo; cobertura abaixo de 60% não gera nota."),
+              notice("A nota resume apenas os critérios que puderam ser avaliados. Não representa aprovação jurídica do site. Itens sem conclusão não entram no cálculo; a cobertura indica quanto da rubrica sustenta a nota."),
               p("Indicadores por assunto", "section"), CategoryPanel(width, score["categories"]), Spacer(1, 15)]
     if score["missing"]:
         summary = f"Comece pela revisão de {len(score['missing'])} critério(s) não identificado(s). As orientações e evidências estão nas próximas páginas."
@@ -296,7 +296,7 @@ def generate_pdf(audit):
     story.append(PageBreak())
     section(next_section, "Metodologia e interpretação")
     story += [p(f"Rubrica {score['version']} - {score['earned']} pontos identificados de {score['assessed']} efetivamente avaliados. Os pesos completos somam 100 pontos."),
-              p("Nota = 100 × pontos identificados / pesos avaliados. Erros e itens não executados ficam fora do denominador. Cobertura mínima: 60%. Escala: A de 90 a 100; B de 75 a 89; C de 60 a 74; D de 40 a 59; E abaixo de 40.", "small"),
+              p("Nota = 100 × pontos identificados / pesos avaliados. Erros e itens não executados ficam fora do denominador. Sem política localizável, seus temas contam como não identificados. Cobertura abaixo de 60% limita a letra a C. Escala: A de 90 a 100; B de 75 a 89; C de 60 a 74; D de 40 a 59; E abaixo de 40.", "small"),
               p("Pesos e faixas são decisões acadêmicas do projeto; não constituem uma escala oficial da ANPD. Termos isolados podem gerar falsos positivos, e outras redações podem gerar falsos negativos. A IA não altera a nota.", "small")]
     if not audit.score:
         story.append(notice("Registro anterior à rubrica: os indicadores foram calculados nesta exportação, sem alterar o histórico original."))

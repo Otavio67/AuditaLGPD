@@ -10,6 +10,8 @@ def fold(text):
     return "".join(c for c in unicodedata.normalize("NFD", text.lower()) if unicodedata.category(c) != "Mn")
 
 
+METHODOLOGY = "observaveis-2.0"
+
 # key, título, categoria, peso, orientação. A soma dos pesos é 100.
 RULES = [
     ("https", "Conexão HTTPS", "Segurança", 10, "Disponibilize a página em HTTPS com certificado válido e redirecione os acessos HTTP."),
@@ -30,8 +32,10 @@ PATTERNS = {
     "purposes": r"finalidade|para que utilizamos|como utilizamos|usamos seus dados|purpose",
     "data_types": r"dados (?:pessoais )?(?:coletados|que coletamos)|coletamos.{0,90}(?:nome|email|e-mail|telefone|endereco|ip)|information we collect",
     "sharing": r"compartilh|sharing|share.{0,50}(?:data|information)|nao.{0,30}vendemos",
-    "retention": r"retencao|armazenad[oa]s? por|periodo de (?:armazenamento|conservacao)|eliminacao.{0,70}dados|retention",
-    "rights": r"direitos (?:dos? |do titular|de voce)|direito.{0,70}(?:acesso|correcao|exclusao|portabilidade)|your rights",
+    "retention": r"retencao|armazenad[oa]s? por|periodo de (?:armazenamento|conservacao)|eliminacao.{0,70}dados|retention|"
+                 r"(?:por )?quanto tempo (?:mantemos|guardamos|armazenamos|conservamos)|(?:dados|informacoes).{0,60}conservad[oa]s",
+    "rights": r"direitos (?:dos? |do titular|de voce)|direito.{0,70}(?:acesso|correcao|exclusao|portabilidade)|your rights|"
+              r"direitos sobre (?:os )?(?:seus )?dados",
     "legal_basis": r"bas(?:e|es) lega(?:l|is)|legitimo interesse|execucao de contrato|obrigacao legal|legal bas(?:is|es)",
 }
 
@@ -60,7 +64,9 @@ def policy_topics(text, unavailable=Status.NOT_RUN):
         status = (Status.PRESENT if match else Status.ABSENT) if flat else unavailable
         excerpt = flat[max(0, match.start()-55):match.end()+135] if match else ""
         detail = ("Foram encontrados termos relacionados a este tema. O trecho precisa ser conferido no contexto." if match else
-                  "Não foram encontrados os termos previstos pela heurística neste texto. Outra redação pode gerar falso negativo.") if flat else "O texto da política não pôde ser avaliado; este item não entra no cálculo."
+                  "Não foram encontrados os termos previstos pela heurística neste texto. Outra redação pode gerar falso negativo.") if flat else (
+                  "Nenhuma política de privacidade foi localizada a partir da página; o tema não foi identificado." if unavailable == Status.ABSENT else
+                  "O texto da política não pôde ser avaliado; este item não entra no cálculo.")
         checks.append(Check(key, title, status, detail, [excerpt] if excerpt else []))
     return checks
 
@@ -118,14 +124,20 @@ def assessment(audit):
         if passed:
             earned += weight
             group["earned"] += weight
-    # Cobertura pequena não produz uma nota aparentemente completa.
-    value = round(100 * earned / assessed) if assessed >= 60 else None
+    # Toda coleta concluída recebe nota; a cobertura é exibida ao lado para
+    # indicar quanto da rubrica sustentou o resultado. Sem nada avaliado
+    # (coleta falhou), não há base para nota.
+    value = round(100 * earned / assessed) if assessed > 0 else None
     grade = next((letter for floor, letter in [(90, "A"), (75, "B"), (60, "C"), (40, "D"), (0, "E")] if value is not None and value >= floor), "—")
+    # Com menos de 60% da rubrica observada, poucos critérios não sustentam A ou B.
+    capped = value is not None and assessed < 60 and grade in {"A", "B"}
+    if capped:
+        grade = "C"
     for group in categories.values():
         group["percent"] = round(100 * group["earned"] / group["assessed"]) if group["assessed"] else None
     return {"value": value, "grade": grade, "earned": earned, "assessed": assessed, "total": 100,
             "coverage": assessed, "categories": list(categories.values()), "items": items,
             "missing": [i for i in items if i["status"] == Status.ABSENT],
             "pending": [i for i in items if i["status"] not in {Status.PRESENT, Status.ABSENT}],
-            "identified": sum(i["status"] == Status.PRESENT for i in items), "manual": MANUAL_REVIEW,
-            "version": "observaveis-1.0"}
+            "identified": sum(i["status"] == Status.PRESENT for i in items), "manual": MANUAL_REVIEW, "capped": capped,
+            "version": METHODOLOGY}
