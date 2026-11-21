@@ -1,0 +1,45 @@
+test_ai_results_render_and_missing_screenshot_is_404 (tests.test_app.AppTests.test_ai_results_render_and_missing_screenshot_is_404) ... ok
+test_async_progress_and_parallel_analysis_rejection (tests.test_app.AppTests.test_async_progress_and_parallel_analysis_rejection) ... ok
+test_complete_flow_persists_redacted_result_and_downloads_pdf (tests.test_app.AppTests.test_complete_flow_persists_redacted_result_and_downloads_pdf) ... ok
+test_evidence_is_escaped_in_html_and_pdf_handles_markup (tests.test_app.AppTests.test_evidence_is_escaped_in_html_and_pdf_handles_markup) ... ok
+test_failed_collection_remains_error_and_not_run (tests.test_app.AppTests.test_failed_collection_remains_error_and_not_run) ... ok
+test_home_demo_and_empty_history (tests.test_app.AppTests.test_home_demo_and_empty_history) ... ok
+test_invalid_url_is_not_stored (tests.test_app.AppTests.test_invalid_url_is_not_stored) ... ok
+test_missing_and_oversized_requests (tests.test_app.AppTests.test_missing_and_oversized_requests) ... ok
+test_post_requires_csrf_and_authorization (tests.test_app.AppTests.test_post_requires_csrf_and_authorization) ... ok
+test_settings_key_never_echoes_and_requires_csrf (tests.test_app.AppTests.test_settings_key_never_echoes_and_requires_csrf) ... ok
+test_untrusted_host_is_rejected (tests.test_app.AppTests.test_untrusted_host_is_rejected) ... ok
+test_banner_absence_and_no_form_are_pending_not_legal_failures (tests.test_assessment.AssessmentTests.test_banner_absence_and_no_form_are_pending_not_legal_failures) ... ok
+test_errors_are_not_scored_as_absences_and_weights_total_100 (tests.test_assessment.AssessmentTests.test_errors_are_not_scored_as_absences_and_weights_total_100) ... ok
+test_insufficient_collection_cannot_award_high_grade (tests.test_assessment.AssessmentTests.test_insufficient_collection_cannot_award_high_grade) ... ok
+test_one_notice_does_not_approve_other_personal_forms (tests.test_assessment.AssessmentTests.test_one_notice_does_not_approve_other_personal_forms) ... ok
+test_topics_have_literal_evidence_and_no_text_is_not_a_failure (tests.test_assessment.AssessmentTests.test_topics_have_literal_evidence_and_no_text_is_not_a_failure) ... ok
+test_browser_background_cookies_are_not_attributed_to_page (tests.test_browser.BrowserSafetyTests.test_browser_background_cookies_are_not_attributed_to_page) ... ok
+test_inventory_never_contains_cookie_value (tests.test_browser.BrowserSafetyTests.test_inventory_never_contains_cookie_value) ... ok
+test_network_events_from_old_page_are_not_attributed_to_current_loader (tests.test_browser.BrowserSafetyTests.test_network_events_from_old_page_are_not_attributed_to_current_loader) ... ok
+test_proxy_connects_to_validated_ip_not_dns_name (tests.test_browser.BrowserSafetyTests.test_proxy_connects_to_validated_ip_not_dns_name) ... ok
+test_proxy_rejects_private_destinations_and_nonstandard_ports (tests.test_browser.BrowserSafetyTests.test_proxy_rejects_private_destinations_and_nonstandard_ports) ... ok
+test_banner_and_personal_form_are_identified_without_values (tests.test_detectors.DetectorTests.test_banner_and_personal_form_are_identified_without_values) ... ok
+test_cookie_word_in_footer_is_not_a_banner (tests.test_detectors.DetectorTests.test_cookie_word_in_footer_is_not_a_banner) ... ok
+test_invalid_or_script_policy_links_are_ignored (tests.test_detectors.DetectorTests.test_invalid_or_script_policy_links_are_ignored) ... ok
+test_policy_links_are_resolved_and_limited (tests.test_detectors.DetectorTests.test_policy_links_are_resolved_and_limited) ... ok
+test_script_hidden_banner_and_search_are_not_positive (tests.test_detectors.DetectorTests.test_script_hidden_banner_and_search_are_not_positive) ... ok
+test_fabricated_evidence_is_discarded (tests.test_gemini.GeminiTests.test_fabricated_evidence_is_discarded) ... ok
+test_fixed_endpoint_key_header_redaction_and_no_score_from_ai (tests.test_gemini.GeminiTests.test_fixed_endpoint_key_header_redaction_and_no_score_from_ai) ... ok
+test_invalid_schema_and_missing_key_do_not_succeed (tests.test_gemini.GeminiTests.test_invalid_schema_and_missing_key_do_not_succeed) ... ok
+test_ui_key_is_never_written_to_preferences (tests.test_gemini.GeminiTests.test_ui_key_is_never_written_to_preferences) ... ok
+test_driver_uses_explicit_binaries_and_rejects_incomplete_bundle (tests.test_portable.PortableTests.test_driver_uses_explicit_binaries_and_rejects_incomplete_bundle) ... ok
+test_relocated_data_and_included_browser_without_saved_key (tests.test_portable.PortableTests.test_relocated_data_and_included_browser_without_saved_key) ... ok
+test_second_process_cannot_acquire_data_lock_and_lock_is_released (tests.test_portable.PortableTests.test_second_process_cannot_acquire_data_lock_and_lock_is_released) ... ok
+test_collector_pins_validated_address_and_limits_body (tests.test_security.SecurityTests.test_collector_pins_validated_address_and_limits_body) ... ok
+test_html_is_required (tests.test_security.SecurityTests.test_html_is_required) ... ok
+test_policy_cannot_leave_origin (tests.test_security.SecurityTests.test_policy_cannot_leave_origin) ... ok
+test_redirect_is_checked_before_second_connection (tests.test_security.SecurityTests.test_redirect_is_checked_before_second_connection) ... ok
+test_rejects_private_schemes_ports_and_credentials (tests.test_security.SecurityTests.test_rejects_private_schemes_ports_and_credentials) ... ok
+test_resolver_rejects_mixed_public_private_answers (tests.test_security.SecurityTests.test_resolver_rejects_mixed_public_private_answers) ... ok
+test_round_trip_and_parameterized_lookup (tests.test_storage.StorageTests.test_round_trip_and_parameterized_lookup) ... ok
+
+----------------------------------------------------------------------
+Ran 40 tests in 3.517s
+
+OK

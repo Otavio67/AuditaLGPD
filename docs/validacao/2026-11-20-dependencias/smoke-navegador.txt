@@ -1,0 +1,1 @@
+OK: JavaScript real, aviso dinâmico, controles de cookies, captura e remoção de valores; tráfego de inicialização não atribuído à página.

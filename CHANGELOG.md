@@ -1,5 +1,10 @@
 # Alterações
 
+## Dependências — 20/11/2026
+
+- reportlab 5.1.0, pillow 13.0.0, soupsieve 4.1.3, selenium 4.53.0 e atualizações menores (trio, certifi, click, pycparser); limite do reportlab ampliado para `<6`.
+- Validação com 40 testes, smoke do navegador real, comparação visual do PDF e prints em `docs/validacao/2026-11-20-dependencias/`.
+
 ## Pacote portátil — 17/10/2026
 
 - Distribuição Windows x64 com Python, dependências e navegador/driver incluídos.
