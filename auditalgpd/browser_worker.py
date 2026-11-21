@@ -26,6 +26,10 @@ return root.outerHTML;
 """
 
 
+BROWSER_DISABLED_FEATURES = ("HttpsUpgrades", "HttpsFirstBalancedModeAutoEnable",
+                             "HttpsFirstModeV2ForTypicallySecureUsers", "msAutomaticHttps", "AutomaticHttps")
+
+
 def cookie_inventory(cookies):
     """Allowlist: valores/tokens nunca cruzam a fronteira do coletor."""
     return [{"name": str(c.get("name", ""))[:120], "domain": str(c.get("domain", ""))[:253],
@@ -76,6 +80,8 @@ def navigation_error(response):
     if status in {401, 403, 429}:
         return (f"O site respondeu com HTTP {status} ao navegador automatizado. Alguns sites bloqueiam "
                 f"navegadores controlados por software; a análise simples pode funcionar. {no_score}")
+    if status == 502:
+        return f"O navegador não conseguiu se conectar ao site (HTTP 502). {no_score}"
     return f"O site respondeu com HTTP {status} no navegador. {no_score}"
 
 
@@ -133,6 +139,9 @@ def collect(config):
     options.page_load_strategy = "eager"
     for argument in ["--headless=new", "--window-size=1365,900", "--disable-background-networking", "--disable-sync",
                      "--no-first-run", "--disable-default-apps", "--disable-quic", "--disable-extensions",
+                     # Sem promoção automática para HTTPS: o diagnóstico deve observar o
+                     # protocolo que o site realmente serve (sites só-HTTP falhavam).
+                     "--disable-features=" + ",".join(BROWSER_DISABLED_FEATURES),
                      "--force-webrtc-ip-handling-policy=disable_non_proxied_udp", "--proxy-bypass-list=<-loopback>",
                      "--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 127.0.0.1, EXCLUDE localhost", "--user-data-dir=" + config["profile"]]:
         options.add_argument(argument)

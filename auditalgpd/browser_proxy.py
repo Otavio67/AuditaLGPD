@@ -10,7 +10,7 @@ import select
 import socket
 import threading
 import time
-from .security import AuditError, normalize_url, resolve_public
+from .security import AuditError, UnsafeURL, normalize_url, resolve_public
 
 
 def proxy_target(authority, connect=False):
@@ -43,7 +43,14 @@ class PublicProxy(ThreadingHTTPServer):
             if self.connections > 180 or time.monotonic() > self.deadline:
                 raise AuditError("Limite de conexões do navegador atingido.")
         addresses = self.resolver(target.host, target.port)
-        remote = self.connector((addresses[0], target.port), timeout=5)
+        for index, address in enumerate(addresses):
+            # Todos os endereços já foram validados como públicos pelo resolvedor.
+            try:
+                remote = self.connector((address, target.port), timeout=5)
+                break
+            except OSError:
+                if index == len(addresses) - 1:
+                    raise
         with self.lock:
             self.sockets.add(remote)
             self.domains.add(target.host)
@@ -109,12 +116,16 @@ class Handler(BaseHTTPRequestHandler):
                 remote.sendall(head.encode("iso-8859-1"))
             started = True
             self.server.relay(self.connection, remote)
-        except (AuditError, OSError, ValueError):
+        except (AuditError, OSError, ValueError) as exc:
             with self.server.lock:
                 self.server.blocked += 1
             if not started:
+                # 403 só para destino proibido; falha de conexão é 502, para não
+                # ser confundida com bloqueio feito pelo próprio site.
+                forbidden = isinstance(exc, (UnsafeURL, ValueError))
                 try:
-                    self.send_error(403, "Destino indisponivel ou nao permitido")
+                    self.send_error(403 if forbidden else 502,
+                                    "Destino nao permitido" if forbidden else "Destino indisponivel")
                 except OSError:
                     pass
         finally:

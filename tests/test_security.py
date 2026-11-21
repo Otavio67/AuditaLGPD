@@ -77,6 +77,21 @@ class SecurityTests(unittest.TestCase):
         with self.assertRaises(UnsafeURL):
             fetcher.fetch("https://other.example.org/privacy", origin=("https", "example.org", 443))
 
+    def test_unreachable_address_falls_back_to_next_validated_address(self):
+        attempts = []
+        class Unreachable(Connection):
+            def request(self, *args, **kwargs):
+                raise TimeoutError("sem rota")
+        def connector(target, address, timeout):
+            attempts.append(address)
+            return Unreachable(None) if address == "34.223.124.45" else Connection(Response(b"<html>ok</html>"))
+        fetcher = SafeFetcher(resolver=lambda *_: ["34.223.124.45", "2600:1f13::1"], connector=connector)
+        self.assertEqual(fetcher.fetch("http://example.org").html, "<html>ok</html>")
+        self.assertEqual(attempts, ["34.223.124.45", "2600:1f13::1"])
+        fetcher = SafeFetcher(resolver=lambda *_: ["34.223.124.45"], connector=connector)
+        with self.assertRaises(AuditError):
+            fetcher.fetch("http://example.org")
+
     def test_https_uses_certifi_roots_with_full_verification(self):
         import certifi, ssl
         from auditalgpd.security import PinnedHTTPS

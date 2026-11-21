@@ -11,7 +11,11 @@
 - Correção: a validação TLS da análise simples passou a usar as raízes do `certifi`; no Windows, certificados válidos eram recusados.
 - Correção: um bloqueio HTTP 401/403/429 na análise avançada agora informa o código e sugere a análise simples.
 - Correção: capturas acima de 1 MB são reduzidas em vez de descartadas.
-- `certifi` e `pillow` declarados como dependências diretas. A suíte passou a ter 43 testes.
+- `certifi` e `pillow` declarados como dependências diretas.
+- Correção: a coleta simples e o proxy do navegador tentam todos os IPs validados, não só o primeiro.
+- Correção: o proxy responde 502 para falha de conexão e reserva 403 para destinos proibidos.
+- Correção: promoção automática para HTTPS desativada no navegador de coleta; sites só-HTTP falhavam na análise avançada.
+- Suíte com 45 testes.
 
 ## Pacote portátil — 17/10/2026
 

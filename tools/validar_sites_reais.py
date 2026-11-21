@@ -20,6 +20,7 @@ import time
 from pathlib import Path
 
 from selenium import webdriver
+from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from werkzeug.serving import make_server
@@ -57,7 +58,7 @@ def run_one(driver, base, app, out, group, url, mode):
     driver.execute_script("arguments[0].click()", driver.find_element(By.ID, "submit-audit"))
     started = time.monotonic()
     try:
-        WebDriverWait(driver, 200, poll_frequency=1).until(
+        WebDriverWait(driver, 200, poll_frequency=1, ignored_exceptions=[StaleElementReferenceException]).until(
             lambda d: re.search(r"/auditorias/[^/]+$", d.current_url) or visible_alerts(d))
     except Exception as exc:  # noqa: BLE001 - registrar qualquer falha da UI
         row["erro"] = f"Tempo esgotado na interface: {type(exc).__name__}"

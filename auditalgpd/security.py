@@ -145,15 +145,9 @@ class SafeFetcher:
             if remaining <= 0:
                 raise AuditError("O tempo limite da auditoria foi atingido.")
             addresses = self.resolver(target.host, target.port)
-            connection = (self.connector(target, addresses[0], min(self.timeout, remaining)) if self.connector else
-                          (PinnedHTTPS if target.scheme == "https" else PinnedHTTP)(target, addresses[0], min(self.timeout, remaining)))
+            connection = None
             try:
-                connection.request("GET", target.path, headers={
-                    "User-Agent": "AuditaLGPD/0.1 (diagnostico academico preliminar)",
-                    "Accept": "text/html, application/xhtml+xml",
-                    "Accept-Encoding": "identity",
-                    "Connection": "close",
-                })
+                connection = self._send(target, addresses, deadline)
                 response = connection.getresponse()
                 if response.status in {301, 302, 303, 307, 308}:
                     location = response.getheader("Location")
@@ -193,5 +187,31 @@ class SafeFetcher:
             except (OSError, http.client.HTTPException) as exc:
                 raise AuditError("Não foi possível concluir a conexão com o site no prazo disponível.") from exc
             finally:
-                connection.close()
+                if connection:
+                    connection.close()
         raise AuditError("O site ultrapassou o limite de redirecionamentos.")
+
+    def _send(self, target, addresses, deadline):
+        """Tenta cada endereço já validado; um IP inacessível não encerra a coleta."""
+        for index, address in enumerate(addresses):
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise AuditError("O tempo limite da auditoria foi atingido.")
+            timeout = min(self.timeout, remaining)
+            connection = (self.connector(target, address, timeout) if self.connector else
+                          (PinnedHTTPS if target.scheme == "https" else PinnedHTTP)(target, address, timeout))
+            try:
+                connection.request("GET", target.path, headers={
+                    "User-Agent": "AuditaLGPD/0.1 (diagnostico academico preliminar)",
+                    "Accept": "text/html, application/xhtml+xml",
+                    "Accept-Encoding": "identity",
+                    "Connection": "close",
+                })
+                return connection
+            except ssl.SSLCertVerificationError:
+                connection.close()
+                raise
+            except OSError:
+                connection.close()
+                if index == len(addresses) - 1:
+                    raise

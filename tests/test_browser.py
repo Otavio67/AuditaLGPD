@@ -13,6 +13,7 @@ class BrowserResultTests(unittest.TestCase):
         self.assertIn("análise simples", message)
         self.assertIn("Nenhuma nota", message)
         self.assertIn("HTTP 500", navigation_error({"status": 500}))
+        self.assertIn("não conseguiu se conectar", navigation_error({"status": 502}))
         self.assertIn("não retornou", navigation_error(None))
 
     def test_large_screenshot_is_reduced_not_discarded(self):
@@ -46,6 +47,18 @@ class BrowserSafetyTests(unittest.TestCase):
         try:
             proxy.open_public(proxy_target("example.org:443", True))
             connector.assert_called_once_with(("93.184.216.34", 443), timeout=5)
+        finally:
+            proxy.server_close()
+
+    def test_proxy_falls_back_to_next_validated_address(self):
+        connector = Mock(side_effect=[TimeoutError("sem rota"), "socket"])
+        proxy = PublicProxy(resolver=lambda *_: ["34.223.124.45", "2600:1f13::1"], connector=connector)
+        try:
+            self.assertEqual(proxy.open_public(proxy_target("example.org:443", True)), "socket")
+            self.assertEqual([c.args[0] for c in connector.call_args_list], [("34.223.124.45", 443), ("2600:1f13::1", 443)])
+            connector.side_effect = TimeoutError("sem rota")
+            with self.assertRaises(OSError):
+                proxy.open_public(proxy_target("example.org:443", True))
         finally:
             proxy.server_close()
 
