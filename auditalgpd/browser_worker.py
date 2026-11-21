@@ -67,6 +67,37 @@ def page_cookies(cookies, domains):
                                       for host in domains)]
 
 
+def navigation_error(response):
+    """Mensagem para documento principal ausente ou sem sucesso HTTP."""
+    no_score = "Nenhuma nota foi inferida de uma página de erro."
+    if not response or not response.get("status"):
+        return f"A navegação não retornou uma página HTML com resposta HTTP de sucesso. {no_score}"
+    status = int(response["status"])
+    if status in {401, 403, 429}:
+        return (f"O site respondeu com HTTP {status} ao navegador automatizado. Alguns sites bloqueiam "
+                f"navegadores controlados por software; a análise simples pode funcionar. {no_score}")
+    return f"O site respondeu com HTTP {status} no navegador. {no_score}"
+
+
+def fit_screenshot(png, limit=1_000_000):
+    """Reduz a captura para caber no limite em vez de descartá-la."""
+    if len(png) <= limit:
+        return png
+    try:
+        from io import BytesIO
+        from PIL import Image
+        image = Image.open(BytesIO(png)).convert("RGB")
+        for scale in (0.75, 0.5, 0.35):
+            output = BytesIO()
+            image.resize((max(1, round(image.width*scale)), max(1, round(image.height*scale))), Image.LANCZOS) \
+                 .quantize(colors=256, method=Image.Quantize.FASTOCTREE).save(output, "PNG", optimize=True)
+            if output.tell() <= limit:
+                return output.getvalue()
+    except Exception:  # noqa: BLE001 - captura é opcional; nunca interrompe a coleta
+        pass
+    return b""
+
+
 def start_driver(webdriver, options, browser):
     """O portátil usa binários fixos, sem procurar/baixar drivers no PC."""
     binary = os.environ.get("AUDITALGPD_BROWSER_BINARY")
@@ -137,7 +168,7 @@ def collect(config):
             frame_id = tree["frame"]["id"]
             domains, response = page_network(driver.get_log("performance"), frame_loaders(tree), frame_id)
             if not response or not 200 <= response.get("status", 0) < 300:
-                raise AuditError("A navegação não retornou uma página HTML com resposta HTTP de sucesso. Nenhuma nota foi inferida de uma página de erro.")
+                raise AuditError(navigation_error(response))
             if response.get("mimeType", "").lower() not in {"text/html", "application/xhtml+xml"}:
                 raise AuditError("O navegador não recebeu uma página HTML.")
             html = driver.execute_script(DOM_SNAPSHOT)
@@ -147,12 +178,12 @@ def collect(config):
             if driver.title.lower().startswith(("privacy error", "erro de privacidade")):
                 raise AuditError("O navegador não validou a conexão da página.")
             cookies = page_cookies(driver.execute_cdp_cmd("Storage.getCookies", {}).get("cookies", []), domains)
-            screenshot = driver.get_screenshot_as_png()
+            screenshot = fit_screenshot(driver.get_screenshot_as_png())
             return {"url": final.url, "html": html, "tls_verified": final.scheme == "https",
                     "browser": {"name": browser, "version": driver.capabilities.get("browserVersion", ""),
                                 "cookies": cookie_inventory(cookies), "domains": domains, "http_status": response["status"],
                                 "blocked": proxy.blocked, "observation_seconds": 3,
-                                "screenshot": base64.b64encode(screenshot).decode("ascii") if len(screenshot) <= 1_000_000 else ""}}
+                                "screenshot": base64.b64encode(screenshot).decode("ascii")}}
         except WebDriverException as exc:
             if os.environ.get("AUDITALGPD_BROWSER_BINARY"):
                 raise AuditError("Não foi possível abrir o navegador incluído. Verifique se toda a pasta foi extraída e se o Windows permite executar seus componentes.") from exc

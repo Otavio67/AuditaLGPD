@@ -5,6 +5,14 @@
 - reportlab 5.1.0, pillow 13.0.0, soupsieve 4.1.3, selenium 4.53.0 e atualizações menores (trio, certifi, click, pycparser); limite do reportlab ampliado para `<6`.
 - Validação com 40 testes, smoke do navegador real, comparação visual do PDF e prints em `docs/validacao/2026-11-20-dependencias/`.
 
+## Validação com sites reais — 20/11/2026
+
+- Script `tools/validar_sites_reais.py`: executa a aplicação pelo formulário em sites reais e salva prints, PDFs, capturas e resumo JSON.
+- Correção: a validação TLS da análise simples passou a usar as raízes do `certifi`; no Windows, certificados válidos eram recusados.
+- Correção: um bloqueio HTTP 401/403/429 na análise avançada agora informa o código e sugere a análise simples.
+- Correção: capturas acima de 1 MB são reduzidas em vez de descartadas.
+- `certifi` e `pillow` declarados como dependências diretas. A suíte passou a ter 43 testes.
+
 ## Pacote portátil — 17/10/2026
 
 - Distribuição Windows x64 com Python, dependências e navegador/driver incluídos.

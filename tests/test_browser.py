@@ -2,8 +2,35 @@ import unittest
 import json
 from unittest.mock import Mock
 from auditalgpd.browser_proxy import proxy_target, PublicProxy
-from auditalgpd.browser_worker import cookie_inventory, page_cookies, page_network
+from auditalgpd.browser_worker import cookie_inventory, fit_screenshot, navigation_error, page_cookies, page_network
 from auditalgpd.security import UnsafeURL
+
+
+class BrowserResultTests(unittest.TestCase):
+    def test_blocked_navigation_names_status_and_suggests_simple_mode(self):
+        message = navigation_error({"status": 403})
+        self.assertIn("HTTP 403", message)
+        self.assertIn("análise simples", message)
+        self.assertIn("Nenhuma nota", message)
+        self.assertIn("HTTP 500", navigation_error({"status": 500}))
+        self.assertIn("não retornou", navigation_error(None))
+
+    def test_large_screenshot_is_reduced_not_discarded(self):
+        from io import BytesIO
+        import os
+        from PIL import Image
+        noise = Image.frombytes("RGB", (900, 700), os.urandom(900 * 700 * 3))
+        buffer = BytesIO()
+        noise.save(buffer, "PNG")
+        large = buffer.getvalue()
+        self.assertGreater(len(large), 1_000_000)
+        reduced = fit_screenshot(large)
+        self.assertTrue(reduced.startswith(b"\x89PNG"))
+        self.assertLessEqual(len(reduced), 1_000_000)
+        self.assertLess(Image.open(BytesIO(reduced)).width, 900)
+        small = b"\x89PNG small"
+        self.assertIs(fit_screenshot(small), small)
+        self.assertEqual(fit_screenshot(b"not an image" * 200_000), b"")
 
 
 class BrowserSafetyTests(unittest.TestCase):

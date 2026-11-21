@@ -9,6 +9,8 @@ import ssl
 import time
 from urllib.parse import quote, urljoin, urlsplit, urlunsplit
 
+import certifi
+
 
 class AuditError(Exception):
     """Erro de entrada ou coleta que pode ser mostrado ao usuário."""
@@ -91,9 +93,19 @@ class PinnedHTTP(http.client.HTTPConnection):
         self.sock = socket.create_connection((self.address, self.port), self.timeout)
 
 
+def tls_context():
+    """Validação TLS com a cadeia de raízes do certifi.
+
+    O repositório do Windows só obtém algumas raízes sob demanda, o que faz
+    certificados válidos falharem no Python. O certifi mantém o resultado
+    igual em Windows, Linux e no pacote portátil.
+    """
+    return ssl.create_default_context(cafile=certifi.where())
+
+
 class PinnedHTTPS(http.client.HTTPSConnection):
     def __init__(self, target, address, timeout):
-        super().__init__(target.host, target.port, timeout=timeout, context=ssl.create_default_context())
+        super().__init__(target.host, target.port, timeout=timeout, context=tls_context())
         self.address = address
 
     def connect(self):

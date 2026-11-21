@@ -77,6 +77,15 @@ class SecurityTests(unittest.TestCase):
         with self.assertRaises(UnsafeURL):
             fetcher.fetch("https://other.example.org/privacy", origin=("https", "example.org", 443))
 
+    def test_https_uses_certifi_roots_with_full_verification(self):
+        import certifi, ssl
+        from auditalgpd.security import PinnedHTTPS
+        with patch("ssl.create_default_context", wraps=ssl.create_default_context) as factory:
+            connection = PinnedHTTPS(normalize_url("https://example.org"), "93.184.216.34", 5)
+        factory.assert_called_once_with(cafile=certifi.where())
+        self.assertEqual(connection._context.verify_mode, ssl.CERT_REQUIRED)
+        self.assertTrue(connection._context.check_hostname)
+
     def test_html_is_required(self):
         fetcher = SafeFetcher(resolver=lambda *_: ["93.184.216.34"], connector=lambda *_: Connection(Response(headers={"Content-Type": "application/pdf"})))
         with self.assertRaises(AuditError):
