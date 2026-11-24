@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Analisando{% endblock %}
+{% block content %}
+<section class="progress-page" data-poll="{{ url_for('web.job', job_id=job_id) }}" data-home="{{ url_for('web.home') }}">
+  <p class="eyebrow"><span class="live-dot"></span> ANÁLISE EM ANDAMENTO{% if label %} · {{ label }}{% endif %}</p>
+  <h1 id="progress-title" class="progress-title" aria-live="polite">Iniciando a análise</h1>
+  <div id="progress-bar" class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-labelledby="progress-title">
+    <div id="progress-fill" class="progress-fill"></div>
+  </div>
+  <div class="progress-meta"><strong id="progress-percent">0%</strong><span>Você será levado ao resultado automaticamente.</span></div>
+  <ol id="progress-log" class="progress-log" aria-label="Etapas já concluídas"></ol>
+  <div id="progress-error" class="alert error" role="alert" hidden></div>
+  <noscript><div class="alert error">Esta página precisa de JavaScript para mostrar o andamento. Abra o <a href="{{ url_for('web.history') }}">histórico</a> para ver o resultado quando a análise terminar.</div></noscript>
+</section>
+<script src="{{ url_for('static', filename='progress.js') }}" defer></script>
+{% endblock %}

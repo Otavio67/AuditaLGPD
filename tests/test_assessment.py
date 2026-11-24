@@ -5,9 +5,16 @@ from auditalgpd.domain import AuditResult, Check, Status
 
 
 class AssessmentTests(unittest.TestCase):
-    def test_insufficient_collection_cannot_award_high_grade(self):
+    def test_low_coverage_gives_limited_lower_bound_grade(self):
         result = assessment(AuditResult("https://example.org", checks=[Check("https", "HTTPS", Status.PRESENT, "ok")]))
         self.assertEqual(result["coverage"], 10)
+        self.assertTrue(result["limited"])
+        self.assertEqual(result["value"], 10)
+        self.assertEqual(result["grade"], "E")
+        self.assertIn("policy", [i["key"] for i in result["pending"]])
+
+    def test_no_evaluated_criteria_gives_no_grade(self):
+        result = assessment(AuditResult("https://example.org", checks=[]))
         self.assertIsNone(result["value"])
         self.assertEqual(result["grade"], "—")
 

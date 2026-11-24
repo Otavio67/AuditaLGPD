@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Acesso à demonstração{% endblock %}
+{% block content %}
+<section class="panel audit-form access-panel">
+  <p class="eyebrow">DEMONSTRAÇÃO TEMPORÁRIA</p>
+  <h1>Digite o código de acesso</h1>
+  <p class="hint">O código foi informado pela pessoa que está apresentando o projeto.</p>
+  {% if error %}<div class="alert error" role="alert">{{ error }}</div>{% endif %}
+  <form method="post" action="{{ url_for('web.access') }}">
+    <input type="hidden" name="csrf" value="{{ csrf_token }}">
+    <label for="codigo">Código</label>
+    <input id="codigo" name="codigo" type="password" autocomplete="off" required maxlength="200">
+    <button type="submit" class="button primary">Entrar <span aria-hidden="true">→</span></button>
+  </form>
+</section>
+{% endblock %}

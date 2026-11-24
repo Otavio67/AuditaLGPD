@@ -16,3 +16,8 @@ dist/
 *.egg-info/
 .DS_Store
 .vscode/
+
+# Capturas e QR codes gerados em testes e na demonstração (mostram sites de terceiros e o link da apresentação)
+prints-*/
+demonstracao-qr.png
+qr-banner-link-fixo.png

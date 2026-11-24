@@ -149,6 +149,72 @@ class CategoryPanel(Flowable):
             c.drawString(x+10, 11, caption)
 
 
+AMBER_BG = colors.HexColor("#fff8e8")
+AMBER_LINE = colors.HexColor("#f0d28a")
+AMBER_BAR = colors.HexColor("#e39a13")
+AMBER_DARK = colors.HexColor("#4a2f00")
+AMBER_TEXT = colors.HexColor("#5b4a2b")
+ORANGE = colors.HexColor("#e8860b")
+
+
+class Marker(Flowable):
+    """Ícone de gravidade desenhado em vetor: triângulo (alta), quadrado (média), círculo (pendente)."""
+
+    def __init__(self, kind):
+        super().__init__()
+        self.kind, self.width, self.height = kind, 11, 11
+
+    def wrap(self, *_):
+        return self.width, self.height
+
+    def draw(self):
+        c = self.canv
+        if self.kind == "alta":
+            c.setFillColor(RED)
+            shape = c.beginPath()
+            shape.moveTo(5.5, 10.5)
+            shape.lineTo(.5, 1)
+            shape.lineTo(10.5, 1)
+            shape.close()
+            c.drawPath(shape, fill=1, stroke=0)
+        elif self.kind == "media":
+            c.setFillColor(ORANGE)
+            c.rect(1, 1, 9, 9, fill=1, stroke=0)
+        else:
+            c.setStrokeColor(MUTED)
+            c.setLineWidth(1.3)
+            c.circle(5.5, 5.5, 4.2, fill=0, stroke=1)
+
+
+class GradeShift(Flowable):
+    """Nota atual → nota estimada, no mesmo formato do painel da tela."""
+
+    def __init__(self, score):
+        super().__init__()
+        self.score, self.width, self.height = score, 118, 50
+
+    def wrap(self, *_):
+        return self.width, self.height
+
+    def draw(self):
+        c, score = self.canv, self.score
+        c.setFillColor(WHITE)
+        c.setStrokeColor(AMBER_LINE)
+        c.roundRect(0, 0, self.width, self.height, 7, fill=1, stroke=1)
+        for x, grade, value, color in [(24, score["grade"], score["value"], RED), (94, score["potential"]["grade"], score["potential"]["value"], GREEN)]:
+            c.setFillColor(color)
+            c.setFont("AuditSans-Bold", 22)
+            c.drawCentredString(x, 21, grade)
+            c.setFillColor(MUTED)
+            c.setFont("AuditSans-Bold", 7)
+            c.drawCentredString(x, 9, str(value))
+        c.setStrokeColor(AMBER_BAR)
+        c.setLineWidth(1.4)
+        c.line(46, 26, 70, 26)
+        c.line(64, 30, 70, 26)
+        c.line(64, 22, 70, 26)
+
+
 def generate_pdf(audit):
     stream, s = BytesIO(), styles()
     left, bottom, top = 18*mm, 21*mm, 33*mm
@@ -239,7 +305,7 @@ def generate_pdf(audit):
     if audit.demo:
         story += [notice("DEMONSTRAÇÃO - dados fictícios para apresentar o relatório. Nenhum site foi consultado.", colors.HexColor("#fff6e2")), Spacer(1, 10)]
     story += [ScorePanel(width, score), Spacer(1, 12),
-              notice("A nota resume apenas os critérios que puderam ser avaliados. Não representa aprovação jurídica do site. Itens sem conclusão não entram no cálculo; cobertura abaixo de 60% não gera nota."),
+              notice("A nota resume apenas os critérios que puderam ser avaliados. Não representa aprovação jurídica do site. Itens sem conclusão não entram no cálculo; cobertura abaixo de 60% gera nota limitada (piso), com os critérios pendentes listados."),
               p("Indicadores por assunto", "section"), CategoryPanel(width, score["categories"]), Spacer(1, 15)]
     if score["missing"]:
         summary = f"Comece pela revisão de {len(score['missing'])} critério(s) não identificado(s). As orientações e evidências estão nas próximas páginas."
@@ -249,6 +315,67 @@ def generate_pdf(audit):
               p("Identificado = sinal encontrado. Não identificado = a busca não encontrou o sinal. Erro ou não executado = não há conclusão. Essas observações exigem conferência no contexto.", "small"),
               p(f"Registro: {audit.id}  |  Metodologia: {score['version']}", "tiny"), PageBreak()]
 
+    def insights_story():
+        """Painel 'Como melhorar a nota': só para nota abaixo de 60, como na tela."""
+        improvements, pending = score.get("improvements", []), score["pending"]
+        if score["value"] is None or score["value"] >= 60 or not (improvements or pending):
+            return []
+        title_style = ParagraphStyle("InsTitle", parent=s["section"], spaceBefore=0, spaceAfter=6, textColor=AMBER_DARK, keepWithNext=0)
+        kicker_style = ParagraphStyle("InsKicker", parent=s["kicker"], textColor=colors.HexColor("#a9650a"), spaceAfter=5)
+        text_style = ParagraphStyle("InsText", parent=s["body"], textColor=AMBER_TEXT, spaceAfter=0)
+        estimate = ""
+        if improvements:
+            potential = score["potential"]
+            estimate = (f" Corrigindo todos os itens marcados como não identificados, a nota estimada passa de "
+                        f"<b>{score['grade']} ({score['value']})</b> para <b>{potential['grade']} ({potential['value']})</b>.")
+        intro = Paragraph("Os itens estão ordenados pelo ganho de pontos na rubrica." + estimate +
+                          " É uma estimativa pela rubrica, não uma garantia nem uma certificação.", text_style)
+        left_column = [Paragraph("COMO MELHORAR A NOTA", kicker_style), Paragraph("A nota está baixa. Veja o que mais pesa.", title_style), intro]
+        head = Table([[left_column, GradeShift(score) if improvements else ""]], colWidths=[width-162, 146])
+        head.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("BACKGROUND", (0, 0), (-1, -1), AMBER_BG),
+                                  ("LINEBEFORE", (0, 0), (0, -1), 4, AMBER_BAR), ("BOX", (0, 0), (-1, -1), .6, AMBER_LINE),
+                                  ("LEFTPADDING", (0, 0), (-1, -1), 14), ("RIGHTPADDING", (0, 0), (-1, -1), 12),
+                                  ("TOPPADDING", (0, 0), (-1, -1), 14), ("BOTTOMPADDING", (0, 0), (-1, -1), 14)]))
+        block = [head, Spacer(1, 8)]
+        advice = getattr(audit, "advice", None) or {}
+        tips = advice.get("tips", {})
+        if tips:
+            block += [notice("Parte dos textos desta seção foi escrita com ajuda do Gemini, a IA do Google. A IA pode cometer erros, citar leis de forma imprecisa "
+                             "ou não considerar o contexto do site. Use como sugestão e confirme com um profissional. A nota é calculada pela rubrica e não é "
+                             "alterada pela IA. Foram enviados ao Google o endereço do site, o resultado dos critérios, os nomes dos cookies observados (sem valores), os tipos de campo dos formulários, os serviços de terceiros e, quando a política foi lida, o texto dela, com remoção básica de e-mails, CPFs e telefones.", colors.HexColor("#eaf1ff")), Spacer(1, 6)]
+            if advice.get("summary"):
+                block += [p("Resumo do Gemini: " + advice["summary"], "small"), Spacer(1, 4)]
+        elif advice.get("error"):
+            block += [notice("Não foi possível obter as dicas do Gemini desta vez. As orientações abaixo são as padrão da rubrica."), Spacer(1, 6)]
+        gain_style = ParagraphStyle("Gain", parent=s["status"], textColor=colors.HexColor("#8a4b00"))
+        high_style = ParagraphStyle("GainHigh", parent=s["status"], textColor=RED)
+        if improvements:
+            block.append(p("Ações com maior ganho", "subhead"))
+        for item in improvements:
+            gain = Paragraph(f"+{item['gain']} pts", high_style if item["severity"] == "alta" else gain_style)
+            found = f" Já presente: {', '.join(item['evidence'])}." if item.get("evidence") else ""
+            tip = tips.get(item["key"])
+            tip_flowables = [p("Dica do Gemini (IA, pode conter erros): " + tip["text"] + (" Base: " + " · ".join(tip["refs"]) if tip["refs"] else ""), "small")] if tip else []
+            row = Table([[Marker(item["severity"]),
+                          [p(item["title"], "check_title"), Spacer(1, 3), p("O que fazer: " + item["recommendation"]), *tip_flowables,
+                           p("O que encontramos: " + item["detail"] + found, "small"),
+                           p(f"{item['category']} · peso {item['weight']} · confirme manualmente antes de alterar o site.", "tiny")],
+                          gain]], colWidths=[22, width-96, 62])
+            row.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("BACKGROUND", (0, 0), (-1, -1), AMBER_BG),
+                                     ("BACKGROUND", (2, 0), (2, 0), colors.HexColor("#ffe9ec") if item["severity"] == "alta" else colors.white),
+                                     ("BOX", (0, 0), (-1, -1), .5, AMBER_LINE), ("LINEBEFORE", (0, 0), (0, -1), 3, AMBER_BAR if item["severity"] != "alta" else RED),
+                                     ("LEFTPADDING", (0, 0), (-1, -1), 9), ("RIGHTPADDING", (0, 0), (-1, -1), 9),
+                                     ("TOPPADDING", (0, 0), (-1, -1), 9), ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+                                     ("TOPPADDING", (2, 0), (2, 0), 12)]))
+            block += [KeepTogether([row]), Spacer(1, 5)]
+        if pending:
+            total = sum(item["weight"] for item in pending)
+            block += [Spacer(1, 4), p(f"Ainda não avaliados - podem somar até {total} pontos", "subhead"),
+                      table(["CRITÉRIO", "PODE SOMAR"], [(item["title"], f"até {item['weight']} pts") for item in pending], [width*.72, width*.28], compact=True)]
+        block += [Spacer(1, 12)]
+        return block
+
+    story += insights_story()
     section(1, "O que revisar e melhorar")
     if not score["missing"]:
         story.append(notice("Nenhuma ausência nos critérios avaliados. Isso não elimina a necessidade de revisão humana e de análise dos itens pendentes."))
@@ -296,7 +423,7 @@ def generate_pdf(audit):
     story.append(PageBreak())
     section(next_section, "Metodologia e interpretação")
     story += [p(f"Rubrica {score['version']} - {score['earned']} pontos identificados de {score['assessed']} efetivamente avaliados. Os pesos completos somam 100 pontos."),
-              p("Nota = 100 × pontos identificados / pesos avaliados. Erros e itens não executados ficam fora do denominador. Cobertura mínima: 60%. Escala: A de 90 a 100; B de 75 a 89; C de 60 a 74; D de 40 a 59; E abaixo de 40.", "small"),
+              p("Nota = 100 × pontos identificados / pesos avaliados. Erros e itens não executados ficam fora do denominador. Cobertura abaixo de 60% gera nota limitada (piso). Escala: A de 90 a 100; B de 75 a 89; C de 60 a 74; D de 40 a 59; E abaixo de 40.", "small"),
               p("Pesos e faixas são decisões acadêmicas do projeto; não constituem uma escala oficial da ANPD. Termos isolados podem gerar falsos positivos, e outras redações podem gerar falsos negativos. A IA não altera a nota.", "small")]
     if not audit.score:
         story.append(notice("Registro anterior à rubrica: os indicadores foram calculados nesta exportação, sem alterar o histórico original."))

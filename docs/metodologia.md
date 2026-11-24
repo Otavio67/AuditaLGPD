@@ -6,7 +6,7 @@ Esta é uma rubrica acadêmica do AuditaLGPD, não uma escala oficial da ANPD ne
 
 Os pesos somam 100: HTTPS 10; link de política 10; acesso ao texto 5; finalidades 10; categorias de dados 5; compartilhamento 10; retenção 5; direitos 10; responsável e contato 10; explicação das bases legais 5; escolhas no aviso de cookies 10; informação junto ao formulário 10.
 
-Nota = 100 × pontos identificados / pesos efetivamente avaliados, arredondada ao inteiro mais próximo. Erros, itens não executados e aplicabilidade indeterminada não entram no denominador. A cobertura mostra quantos dos 100 pontos puderam ser avaliados. Cobertura abaixo de 60% não produz nota ou letra. A: 90–100; B: 75–89; C: 60–74; D: 40–59; E: 0–39. Esses limiares são uma decisão de projeto, ainda sem validação empírica.
+Nota = 100 × pontos identificados / pesos efetivamente avaliados, arredondada ao inteiro mais próximo. Erros, itens não executados e aplicabilidade indeterminada não entram no denominador. A cobertura mostra quantos dos 100 pontos puderam ser avaliados. Cobertura abaixo de 60% gera nota limitada: os pontos não avaliados contam como zero, então o valor é um piso; os critérios pendentes são listados no relatório. A: 90–100; B: 75–89; C: 60–74; D: 40–59; E: 0–39. Esses limiares são uma decisão de projeto, ainda sem validação empírica.
 
 Os temas da política são identificados por vocabulário explícito e acompanhados de trecho literal. Termos isolados podem produzir falsos positivos. Redação diferente pode produzir falsos negativos. O item de responsável exige vocabulário de controlador e de canal de contato, mas não comprova que o atendimento funciona. O canal do controlador não equivale à obrigatoriedade universal de nomear encarregado.
 

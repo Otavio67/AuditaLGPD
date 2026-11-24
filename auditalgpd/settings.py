@@ -5,12 +5,14 @@ import os
 from pathlib import Path
 import re
 from .security import AuditError
+from .ai_cache import AiCache
 from .gemini import GeminiClient
 
 
 class Settings:
     def __init__(self, directory):
         self.path = Path(directory) / "preferences.json"
+        self.cache = AiCache(Path(directory) / "ai_cache.sqlite3")
         try:
             preferences = json.loads(self.path.read_text(encoding="utf-8"))
         except (OSError, ValueError):
@@ -34,7 +36,7 @@ class Settings:
         self.path.write_text(json.dumps({"browser": browser, "model": model}), encoding="utf-8")
 
     def client(self):
-        return GeminiClient(self.api_key, self.model)
+        return GeminiClient(self.api_key, self.model, cache=self.cache)
 
     def public(self):
         return {"browser": self.browser, "model": self.model, "configured": bool(self.api_key), "bundled": self.bundled}

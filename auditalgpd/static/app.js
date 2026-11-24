@@ -6,7 +6,7 @@ if (form && window.fetch) {
     const progress = document.querySelector('#progress');
     const errorBox = document.querySelector('#form-error');
     button.disabled = true;
-    button.textContent = 'Analisando…';
+    button.textContent = 'Iniciando…';
     errorBox.hidden = true;
     form.setAttribute('aria-busy', 'true');
     try {
@@ -14,15 +14,8 @@ if (form && window.fetch) {
       if (!response.headers.get('content-type')?.includes('application/json')) throw new Error('A sessão expirou ou a solicitação não foi aceita. Atualize a página e tente novamente.');
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Não foi possível iniciar a análise.');
-      while (true) {
-        const stateResponse = await fetch(data.progress_url, {cache:'no-store'});
-        if (!stateResponse.ok) throw new Error('Não foi possível acompanhar a análise. Confira o histórico antes de tentar novamente.');
-        const state = await stateResponse.json();
-        progress.textContent = state.message;
-        if (state.state === 'done') {window.location.assign(state.result_url); return;}
-        if (state.state === 'error') throw new Error(state.message);
-        await new Promise(resolve => setTimeout(resolve, 1800));
-      }
+      window.location.assign(data.page_url);
+      return;
     } catch (error) {
       errorBox.textContent = error.message || 'Conexão interrompida. Confira o histórico local.';
       errorBox.hidden = false;

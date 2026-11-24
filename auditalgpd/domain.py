@@ -45,6 +45,7 @@ class AuditResult:
     mode: str = "static"
     browser: dict = field(default_factory=dict)
     ai: dict = field(default_factory=dict)
+    advice: dict = field(default_factory=dict)
     score: dict = field(default_factory=dict)
     methodology: str = "observaveis-1.0"
 

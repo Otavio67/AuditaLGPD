@@ -87,13 +87,17 @@ def contextual_checks(soup, browser=False):
         if visible(el) and re.search(r"cookie|consent", identity, re.I):
             banners.append(el)
     controls = " ".join(fold(b.get_text(" ", strip=True)) for banner in banners for b in banner.find_all(["button", "a", "input"]) if visible(b))
-    choices = all(re.search(pattern, controls) for pattern in [r"aceit|accept|permitir todos", r"rejeit|recus|reject|necessarios|deny", r"configur|preferenc|personaliz|settings|manage"])
+    kinds = [("aceitar", r"aceit|accept|permitir todos"), ("rejeitar", r"rejeit|recus|reject|necessarios|deny"),
+             ("configurar", r"configur|preferenc|personaliz|settings|manage")]
+    found = [label for label, pattern in kinds if re.search(pattern, controls)]
+    choices = len(found) == len(kinds)
     # A ausência do banner não permite inferir sua obrigatoriedade.
     status = (Status.PRESENT if choices else Status.ABSENT) if banners and browser and detect_banner(soup).status == Status.PRESENT else Status.NOT_RUN
     cookie_check = Check("cookie_choices", "Escolhas no aviso de cookies", status,
                          "Foram localizados controles de aceitar, rejeitar e configurar. Não houve clique nem teste de bloqueio/revogação." if status == Status.PRESENT else
                          "Não foram localizados os três tipos de controle no aviso observado. Verifique sua aplicabilidade e funcionamento." if status == Status.ABSENT else
-                         "Exige um aviso observado no navegador e análise de aplicabilidade. A ausência de banner não implica irregularidade.")
+                         "Exige um aviso observado no navegador e análise de aplicabilidade. A ausência de banner não implica irregularidade.",
+                         found if status == Status.ABSENT else [])
     return [form_check, cookie_check]
 
 
@@ -106,9 +110,11 @@ def assessment(audit):
         status = check.status if check else Status.NOT_RUN
         observed = status in {Status.PRESENT, Status.ABSENT}
         passed = status == Status.PRESENT
+        # Crédito parcial: 1/3 do peso por controle de cookie encontrado (aceitar, rejeitar, configurar).
+        partial = round(weight * len(check.evidence) / 3) if key == "cookie_choices" and status == Status.ABSENT and check else 0
         row = {"key": key, "title": title, "category": category, "weight": weight, "status": status,
                "recommendation": recommendation, "detail": check.detail if check else "Item não avaliado nesta coleta.",
-               "evidence": check.evidence if check else []}
+               "evidence": check.evidence if check else [], "partial": partial}
         items.append(row)
         group = categories.setdefault(category, {"name": category, "earned": 0, "assessed": 0, "total": 0})
         group["total"] += weight
@@ -118,14 +124,38 @@ def assessment(audit):
         if passed:
             earned += weight
             group["earned"] += weight
-    # Cobertura pequena não produz uma nota aparentemente completa.
-    value = round(100 * earned / assessed) if assessed >= 60 else None
-    grade = next((letter for floor, letter in [(90, "A"), (75, "B"), (60, "C"), (40, "D"), (0, "E")] if value is not None and value >= floor), "—")
+        elif partial:
+            earned += partial
+            group["earned"] += partial
+    # Com cobertura suficiente, a nota é a média dos pesos avaliados. Com cobertura baixa,
+    # os pontos não avaliados contam como zero: a nota vira um piso, sem parecer completa.
+    if not assessed:
+        value = None
+    elif assessed >= 60:
+        value = round(100 * earned / assessed)
+    else:
+        value = round(earned)
+    limited = 0 < assessed < 60
     for group in categories.values():
         group["percent"] = round(100 * group["earned"] / group["assessed"]) if group["assessed"] else None
-    return {"value": value, "grade": grade, "earned": earned, "assessed": assessed, "total": 100,
-            "coverage": assessed, "categories": list(categories.values()), "items": items,
+    # Melhorias ordenadas pelo ganho de pontos: o peso do critério menos o crédito parcial já obtido.
+    improvements = sorted(
+        [{"key": i["key"], "title": i["title"], "category": i["category"], "weight": i["weight"],
+          "gain": i["weight"] - i["partial"], "severity": "alta" if i["weight"] - i["partial"] >= 10 else "media",
+          "recommendation": i["recommendation"], "detail": i["detail"], "evidence": i["evidence"]}
+         for i in items if i["status"] == Status.ABSENT],
+        key=lambda item: (-item["gain"], item["title"]))
+    potential_earned = earned + sum(item["gain"] for item in improvements)
+    potential_value = None if not assessed else (round(100 * potential_earned / assessed) if assessed >= 60 else round(potential_earned))
+    return {"value": value, "grade": grade_for(value), "earned": earned, "assessed": assessed, "total": 100,
+            "coverage": assessed, "limited": limited, "categories": list(categories.values()), "items": items,
             "missing": [i for i in items if i["status"] == Status.ABSENT],
             "pending": [i for i in items if i["status"] not in {Status.PRESENT, Status.ABSENT}],
+            "improvements": improvements,
+            "potential": {"value": potential_value, "grade": grade_for(potential_value), "gain": potential_earned - earned},
             "identified": sum(i["status"] == Status.PRESENT for i in items), "manual": MANUAL_REVIEW,
             "version": "observaveis-1.0"}
+
+
+def grade_for(value):
+    return next((letter for floor, letter in [(90, "A"), (75, "B"), (60, "C"), (40, "D"), (0, "E")] if value is not None and value >= floor), "—")
