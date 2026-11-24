@@ -12,7 +12,7 @@ Aplicação web local para diagnóstico técnico preliminar de sinais de privaci
 - Coleta rápida de HTML ou coleta dinâmica com Selenium em Edge/Chrome local, com perfil temporário e captura de tela.
 - Observação de cookies antes de interação: nome, domínio e atributos, sem guardar valores. Domínios são derivados dos eventos da página atual; tráfego de inicialização do navegador é excluído.
 - Identificação heurística de HTTPS, avisos, formulários, política e sete temas de transparência.
-- Rubrica de 12 critérios, pesos somando 100, versão gravada com cada análise e cobertura mínima de 60% para nota.
+- Rubrica de 12 critérios, pesos somando 100, versão gravada com cada análise e nota limitada (piso) quando a cobertura fica abaixo de 60%, com os critérios pendentes listados.
 - Interpretação opcional pelo Gemini, com resposta estruturada e descarte de citações que não existam no texto enviado. A IA não altera a nota.
 - Progresso por etapa, uma coleta de cada vez, histórico SQLite e PDF com capa visual, nota, indicadores, estados em cores, evidências e limitações.
 - Chave Gemini informada pela interface mantida somente na memória desta execução, nunca no GitHub. Preferências sem segredo ficam em `instance/preferences.json`.
@@ -68,7 +68,7 @@ A chave digitada fica na memória do processo Flask e precisa ser informada nova
 
 Marque **Incluir interpretação com Gemini** a cada análise. Isso envia ao Google até 24.000 caracteres do texto da política, com remoção básica de e-mails, CPFs e telefones. Essa remoção não garante anonimização completa. Imagens, cookies e valores de formulários não são enviados. A política inteira pode exceder o limite; a interface informa truncamento.
 
-O Gemini é externo: o processamento por IA não ocorre no computador. Aplicam-se as condições de dados, cotas e eventual cobrança do projeto Google. Sem chave/ativação, não há chamada ao provedor. Não há novas tentativas automáticas de consumo de cota. A integração foi validada com respostas simuladas; o uso real depende de uma chave e modelo disponíveis na conta do usuário.
+O Gemini é externo: o processamento por IA não ocorre no computador. Aplicam-se as condições de dados, cotas e eventual cobrança do projeto Google. Sem chave/ativação, não há chamada ao provedor. Se o modelo estiver indisponível ou sem cota (503, 404, 429 ou sem resposta; a cota gratuita é por modelo), o app tenta modelos alternativos (`GEMINI_FALLBACK_MODELS`, padrão `gemini-3.5-flash,gemini-flash-latest,gemini-3.1-flash-lite,gemini-3.5-flash-lite`) e faz uma rodada extra após 3 segundos; isso não consome cota. A integração foi validada com respostas simuladas; o uso real depende de uma chave e modelo disponíveis na conta do usuário.
 
 ## Escopo e controles
 
